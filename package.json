@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "bitcoinjs-lib": "^6.1.7",
+    "canvas": "^3.2.0",
+    "node-fetch": "^2.7.0",
+    "node-html-parser": "^7.0.1",
+    "pako": "^2.1.0"
+  }
+}
