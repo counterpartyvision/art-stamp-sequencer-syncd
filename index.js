@@ -7,6 +7,74 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function getBlockTipHeight(){
+  try {
+      const response = await fetch(`https://mempool.space/api/blocks/tip/height`);
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const height = await response.text();
+      return height.trim(); // Remove any whitespace/newlines
+  } catch (error) {
+      console.error(`Error fetching block tip height:`, error);
+      return null;
+  } 
+}
+
+async function getBlockHashByHeight(blockHeight) {
+      try {
+          const response = await fetch(`https://mempool.space/api/block-height/${blockHeight}`);
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const hash = await response.text();
+          return hash.trim(); // Remove any whitespace/newlines
+      } catch (error) {
+          console.error(`Error fetching block hash for height ${blockHeight}:`, error);
+          return null;
+      }
+  }
+
+async function getBlockData(blockHeight, blockHash, cache){
+          // Fetch the raw block data
+          //console.log('=== FETCHING DATA ===');
+          //console.log(`Fetching raw block data for ${blockHeight} - ${blockHash}...`);
+          let rawBlockData;
+          let cacheHit = false;
+          //if we are using caching, try to get it from the local folder
+          if(cache){
+              try {
+                const data = fs.readFileSync("./blocks/" + blockHeight + '.dat');
+                console.log("File found reading block #" + blockHeight);
+                rawBlockData = Buffer.from(data);
+                cacheHit = true;
+              } catch (err) {
+                console.error('Block no found');
+              }
+          }
+          
+          // if our blockData is empty, get it from the internet, then save it for future use
+          if(!cacheHit){
+            console.log("No local block, fetching now...")
+            const response = await fetch(`https://mempool.space/api/block/${blockHash}/raw`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            rawBlockData = Buffer.from(arrayBuffer);
+            try {
+              fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
+              console.log("Block saved successfully" + blockHeight + '.dat');
+            } catch (err) {
+              console.error('Error writing file:', err);
+            }
+          }
+
+          return rawBlockData;
+}
+
 async function main() {
   const decoder = new StampDecoder('main'); // Use 'testnet' for testnet
   //const txId = '2825437c2d6cf4250eca8b7bbc487107cc0ee4dfcd765a2dcf33ce31c7db2f45'; // OLGA wimage/wbp
@@ -33,7 +101,7 @@ async function main() {
   const initialBlock = 779652;
   let currentBlock = initialBlock;
   let failCount = 0;
-  let blockTipHeight = await decoder.getBlockTipHeight();
+  let blockTipHeight = await getBlockTipHeight();
   try {
     const data = fs.readFileSync("currentBlock.txt", "utf8");
     currentBlock = parseInt(data.trim());
@@ -47,9 +115,14 @@ async function main() {
   console.log(`Beginning sequencer - currentBlock:${currentBlock}, blockTipHeight:${blockTipHeight}`);
 
   while(currentBlock < blockTipHeight){
-
-    let processed = await decoder.getAndDecodeRawBlock(currentBlock, true);
+    // get the hash of this block number
+    let blockHash = await getBlockHashByHeight(currentBlock);
+    // get the raw block
+    let blockData = await getBlockData(currentBlock, blockHash, true);
+    // process this block
+    let processed = await decoder.decodeRawBlock(currentBlock, blockHash, blockData);
     if(processed){
+      console.log(processed.blockNumber, processed.stamps);
       failCount = 0;
       currentBlock++;
       try {

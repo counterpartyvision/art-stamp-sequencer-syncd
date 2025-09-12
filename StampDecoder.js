@@ -39,36 +39,6 @@ class StampDecoder {
     }
   }
 
-  async getBlockTipHeight(){
-    try {
-        const response = await fetch(`https://mempool.space/api/blocks/tip/height`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const height = await response.text();
-        return height.trim(); // Remove any whitespace/newlines
-    } catch (error) {
-        console.error(`Error fetching block tip height:`, error);
-        return null;
-    } 
-  }
-
-  async getBlockHashByHeight(blockHeight) {
-        try {
-            const response = await fetch(`https://mempool.space/api/block-height/${blockHeight}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const hash = await response.text();
-            return hash.trim(); // Remove any whitespace/newlines
-        } catch (error) {
-            console.error(`Error fetching block hash for height ${blockHeight}:`, error);
-            return null;
-        }
-    }
-
     getOutputScriptType(script) {
         try{
             if(script[0] == 0x6A ) return 'opreturn';
@@ -89,15 +59,16 @@ class StampDecoder {
       let dataFileName = `${txHash}.${this.mimeTypes[mimeType]}`;
       fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(base64Data, 'base64'), { flag: 'w' });
       fs.symlinkSync(dataFileName,"./s/"+cpid);
-      console.log(`Stamp ${cpid} saved successfully`);
+      return true;
     } catch (err) {
-      console.error(`Error writing file:`, err);
+      return false;
     }
   }
 
   // get the 
-  async getAndDecodeRawBlock(blockHeight, cache) {
+  async decodeRawBlock(blockHeight, blockHash, rawBlockData) {
     try {
+        /*
         let blockHash = await this.getBlockHashByHeight(blockHeight);
 
         // Fetch the raw block data
@@ -128,29 +99,22 @@ class StampDecoder {
           rawBlockData = Buffer.from(arrayBuffer);
           try {
             fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
-            console.log("Block saves successfully" + blockHeight + '.dat');
+            console.log("Block saved successfully" + blockHeight + '.dat');
           } catch (err) {
             console.error('Error writing file:', err);
           }
         }
 
-        console.log(`Raw block size: ${rawBlockData.length} bytes`);
+        //console.log(`Raw block size: ${rawBlockData.length} bytes`);
+        */
         
         // Parse the raw block with bitcoinjs-lib
         const parsedBlock = bitcoin.Block.fromBuffer(rawBlockData);
+        let finalBlockData = {};
+        finalBlockData.id = parsedBlock.getId();
+        finalBlockData.blockNumber = blockHeight;
+        finalBlockData.stamps = [];
         
-        console.log('=== BLOCK INFORMATION ===');
-        console.log('Block Hash:', parsedBlock.getId());
-        //console.log('Version:', parsedBlock.version);
-        //console.log('Previous Block Hash:', parsedBlock.prevHash.toString('hex'));
-        //console.log('Merkle Root:', parsedBlock.merkleRoot.toString('hex'));
-        //console.log('Timestamp:', new Date(parsedBlock.timestamp * 1000).toISOString());
-        //console.log('Bits:', parsedBlock.bits);
-        //console.log('Nonce:', parsedBlock.nonce);
-        //console.log('Transaction Count:', parsedBlock.transactions.length);
-
-        // Decode all transactions
-        console.log('\n=== TRANSACTIONS ===');
         const transactions = [];
         let totalStampCount = 0;
 
@@ -167,75 +131,45 @@ class StampDecoder {
                     version: tx.version,
                     locktime: tx.locktime,
                     size: tx.toBuffer().length,
+                    // get just enough info to properly decode inputs and outputs
                     inputs: tx.ins.map((input, idx) => {
-                        try {
-                            const scriptSig = input.script.toString('hex');
-                            const asm = bitcoin.script.toASM(input.script);
-                            
-                            return {
-                                index: idx,
-                                txid: input.hash.reverse().toString('hex'),
-                                vout: input.index,
-                                scriptSig: {
-                                    hex: scriptSig,
-                                    asm: asm
-                                },
-                                sequence: input.sequence
-                            };
-                        } catch (asmError) {
-                            // Handle cases where ASM conversion fails gracefully
-                            return {
-                                index: idx,
-                                txid: input.hash.reverse().toString('hex'),
-                                vout: input.index,
-                                scriptSig: {
-                                    hex: input.script.toString('hex'),
-                                    asm: `ERROR: Could not convert to ASM - ${asmError.message}`
-                                },
-                                sequence: input.sequence
-                            };
-                        }
+                        return {
+                            index: idx,
+                            txid: input.hash.reverse().toString('hex'),
+                            vout: input.index,
+                            sequence: input.sequence
+                        };
                     }),
                     outputs: tx.outs.map((output, idx) => {
-                        try {
-                            const scriptPubKey = output.script.toString('hex');
-                            const asm = bitcoin.script.toASM(output.script);
-                            
-                            return {
-                                index: idx,
-                                value: output.value,
-                                script:output.script.toString('hex'),
-                                type: this.getOutputScriptType(output.script),
-                                scriptPubKey: {
-                                    hex: scriptPubKey,
-                                    asm: asm
-                                }
-                            };
-                        } catch (asmError) {
-                            // Handle cases where ASM conversion fails gracefully
-                            return {
-                                index: idx,
-                                value: output.value,
-                                script:output.script.toString('hex'),
-                                type: this.getOutputScriptType(output.script),
-                                scriptPubKey: {
-                                    hex: output.script.toString('hex'),
-                                    asm: `ERROR: Could not convert to ASM - ${asmError.message}`
-                                }
-                            };
-                        }
+                        return {
+                            index: idx,
+                            value: output.value,
+                            script:output.script.toString('hex'),
+                            type: this.getOutputScriptType(output.script),
+                        };
                     })
                 };
 
                 // go over every tx
-                
-
                     try{
                         let txResult = await this.processTransaction(txInfo, tx.getId());
                         if(txResult){
                           totalStampCount++;
-                          console.log("Stamp Found:",txResult.stampData.asset, txResult.stampData.mimeType, txResult.bitcoinData.txId);
-                          this.saveStamp(txResult.bitcoinData.txId, txResult.stampData.asset, txResult.stampData.mimeType, txResult.stampData.base64Data)
+                          //console.log(JSON.stringify(txResult,0,2))
+                          //console.log("Stamp Found:",txResult.stampData.asset, txResult.stampData.mimeType, txResult.bitcoinData.txId);
+                          let saveResult = this.saveStamp(txResult.bitcoinData.txId, txResult.stampData.asset, txResult.stampData.mimeType, txResult.stampData.base64Data)
+                          let currentStampData = {
+                            asset: txResult.stampData.asset,
+                            issuance: txResult.stampData.issuance,
+                            mime: txResult.stampData.mimeType,
+                            encoding: txResult.stampData.encoding,
+                            saved: saveResult
+                          }
+                          if(txResult.stampData.subasset){
+                            currentStampData.subasset = txResult.stampData.subasset;
+                          }
+                          
+                          finalBlockData.stamps.push(currentStampData);
                         }
                     }
                     catch(e){
@@ -253,23 +187,9 @@ class StampDecoder {
                 });
             }
         }
-        console.log("Stamps Found:", totalStampCount);
-        return true;
+        //console.log("Stamps Found:", totalStampCount);
+        return finalBlockData;
 
-        /*
-        return {
-            blockHash: parsedBlock.getId(),
-            height: null, // You'd need to get this from a separate API call
-            version: parsedBlock.version,
-            prevHash: parsedBlock.prevHash.toString('hex'),
-            merkleRoot: parsedBlock.merkleRoot.toString('hex'),
-            timestamp: new Date(parsedBlock.timestamp * 1000).toISOString(),
-            bits: parsedBlock.bits,
-            nonce: parsedBlock.nonce,
-            transactionCount: parsedBlock.transactions.length,
-            transactions
-        };
-        */
 
     } catch (error) {
         console.error('Error fetching/decoding block:', error);
@@ -323,37 +243,6 @@ class StampDecoder {
       return null;
     }
   }
-  /*
-  async getImageDimensions(base64, fileType) {
-    try {
-      if (!/^[a-zA-Z0-9+\/=]+$/.test(base64)) {
-        throw new Error('Invalid base64 string');
-      }
-      if (fileType === 'svg+xml') {
-        const xml = atob(base64);
-        const root = parse(xml, { blockTextElements: { script: false, style: false } });
-        const svgElement = root.querySelector('svg');
-        if (svgElement) {
-          const width = svgElement.getAttribute('width') || 'unknown';
-          const height = svgElement.getAttribute('height') || 'unknown';
-          if (width && height && !isNaN(parseFloat(width)) && !isNaN(parseFloat(height))) {
-            return `${parseFloat(width)}x${parseFloat(height)}`;
-          }
-        }
-        return 'unknown';
-      } else if (fileType === 'html' || fileType === 'video') {
-        return 'N/A';
-      } else {
-        const buffer = Buffer.from(base64, 'base64');
-        const image = await loadImage(buffer);
-        return `${image.width}x${image.height}`;
-      }
-    } catch (e) {
-      console.error('Error getting dimensions:', e);
-      return 'unknown';
-    }
-  }
-    */
 
   async processTransaction(json, tx) {
     try {
@@ -361,8 +250,6 @@ class StampDecoder {
         bitcoinData: {
           txId: json.hash || 'unknown',
           blockHeight: json.blockHeight || 'unknown',
-          //blockTime: json.received ? new Date(json.received).toLocaleString() : 'unknown',
-          //fromAddress: json.addresses?.[0] || 'unknown'
         },
         stampData: null
       };
@@ -444,8 +331,6 @@ class StampDecoder {
       if(cpMsg.startsWith('434e545250525459')){
         cpMsg = cpMsg.substring(16);
      }
-     //if(cpMsg.length > 0)
-     //   console.log("MESSAGE:", cpMsg);
 
       result.bitcoinData.recipient = recipient !== '0' ? recipient : undefined;
       if (dustSat > 0) {
@@ -453,15 +338,14 @@ class StampDecoder {
         result.bitcoinData.dustBtc = (dustSat / 100000000).toFixed(8);
       }
 
+      // do nothing here, its not a stamp
       if (!cpMsg && p2wshOutputs.length === 0) {
-
         //console.log('No valid CP/Stamp data or P2WSH outputs found');
       }
+      // process stamp
       else{
         const id = parseInt(cpMsg.substring(0, 2), 16);
         cpMsg = cpMsg.substring(2);
-        //console.log("ID:",id,cpMsg);
-        //console.log("ID", id);
         const blockHeightNum = result.bitcoinData.blockHeight === 'unknown' ? 0 : parseInt(result.bitcoinData.blockHeight);
 
         // check for normal olga issuances
@@ -489,7 +373,6 @@ class StampDecoder {
   }
 
  stampDataFromCpMsg(id, cpMsg){
-    //console.log(cpMsg.substring(0, 16));
     return ({
         type: 'Issuance',
         messageId: id,
@@ -502,10 +385,7 @@ class StampDecoder {
   }
 
   async processClassicStamp(tx, cpMsg, blockHeight, id) {
-
     const stampData = this.stampDataFromCpMsg(id, cpMsg);
-    //console.log(stampData)
-
     cpMsg = cpMsg.substring(38);
     const descr = this.hex2a(cpMsg);
     if (descr.toLowerCase().startsWith('stamp:')) {
@@ -515,23 +395,17 @@ class StampDecoder {
   }
 
   async processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
-
     let stampData = this.stampDataFromCpMsg(id, cpMsg);
-
     cpMsg = cpMsg.substring(38);
     const descr = this.hex2a(cpMsg);
-
     if (descr.toLowerCase().startsWith('stamp:')) {
         return { ...stampData, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
     }
-
     throw new Error('Expected Olga Stamp processing error');
   }
 
   async processOlgaSubassetStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
-
     let stampData = this.stampDataFromCpMsg(id, cpMsg);
-
     cpMsg = cpMsg.substring(38);
     const lenSubasset = parseInt(cpMsg.substring(0, 2), 16);
     cpMsg = cpMsg.substring(2);
@@ -541,7 +415,6 @@ class StampDecoder {
     const subassetHex = cpMsg.substring(0, lenSubasset * 2);
     stampData.subasset = this.hexToSubasset(subassetHex);
     stampData.subassetHex = subassetHex;
-
     const descr = this.hex2a(cpMsg.substring(lenSubasset * 2));
     if (descr.toLowerCase().startsWith('stamp:')) {
       return { ...stampData, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
@@ -551,7 +424,7 @@ class StampDecoder {
 
   async parseOlgaStamp(tx, assetHex, p2wshOutputs) {
     let hex = '';
-   let dust = 0;
+    let dust = 0;
     for (const [script, value] of p2wshOutputs) {
       hex += script.slice(4);
       dust += value;
@@ -591,7 +464,7 @@ class StampDecoder {
         const binary = new Uint8Array(decoded.length).map((_, i) => decoded.charCodeAt(i));
         processedImage = btoa(pako.ungzip(binary, { to: 'string' }));
       } catch (e) {
-        throw new Error(`Failed to decompress gZIP data: ${e.message}`);
+        throw new Error(`Failed to decompress gzip data: ${e.message}`);
       }
     }
 
@@ -624,11 +497,10 @@ class StampDecoder {
     }
 
     const stampData = {
-      standard: fileSize ? 'STAMP (OLGA)' : 'STAMP (Classic)',
+      encoding: fileSize ? 'olga' : 'multisig',
       compression: isGzip ? 'gzip' : 'None',
       mimeType: fileType,
       base64Data: `${image}`,
-      //dimensions: await this.getImageDimensions(processedImage, fileType),
     };
 
     if (fileSize) {
