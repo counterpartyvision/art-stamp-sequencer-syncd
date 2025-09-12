@@ -7,6 +7,21 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function createDirectories() {
+  const dirs = ['s', 'log'];
+
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`Created directory: ${dir}`);
+    }
+  });
+}
+
+function processSRC721(stampData){
+
+}
+
 async function getBlockTipHeight(){
   try {
       const response = await fetch(`https://mempool.space/api/blocks/tip/height`);
@@ -39,8 +54,6 @@ async function getBlockHashByHeight(blockHeight) {
 
 async function getBlockData(blockHeight, blockHash, cache){
           // Fetch the raw block data
-          //console.log('=== FETCHING DATA ===');
-          //console.log(`Fetching raw block data for ${blockHeight} - ${blockHash}...`);
           let rawBlockData;
           let cacheHit = false;
           //if we are using caching, try to get it from the local folder
@@ -77,28 +90,11 @@ async function getBlockData(blockHeight, blockHash, cache){
 
 async function main() {
   const decoder = new StampDecoder('main'); // Use 'testnet' for testnet
-  //const txId = '2825437c2d6cf4250eca8b7bbc487107cc0ee4dfcd765a2dcf33ce31c7db2f45'; // OLGA wimage/wbp
-  //const txId = '9e99825880aa7cac75629ec01de28b419f691503af2c4f51b4c8b939fd37e310';
-  
-  /*
-  const txId = '1adf07258cff3af6c3635cae88aad2eb27aa8c6ec4caf26f6251bca17b2b95b7'; // derp thing
-  try {
-    const result = await decoder.decodeTx(txId);
-    console.log(JSON.stringify(result, null, 2));
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
-    */
-   //await decoder.getAndDecodeRawBlock(834454);
-   //await decoder.getAndDecodeRawBlock(904460);
-   //await decoder.getAndDecodeRawBlock(780727, true);
-   //await decoder.getAndDecodeRawBlock(792370, true);
-   //await decoder.getAndDecodeRawBlock(792602, true);
-
-
+  createDirectories();
 
   // if there is not current block file, make one and start at the first stamp, 779652
-  const initialBlock = 779652;
+  //const initialBlock = 779652;
+  const initialBlock = 792370; // src721 initial block?
   let currentBlock = initialBlock;
   let failCount = 0;
   let blockTipHeight = await getBlockTipHeight();
@@ -122,11 +118,14 @@ async function main() {
     // process this block
     let processed = await decoder.decodeRawBlock(currentBlock, blockHash, blockData);
     if(processed){
-      console.log(processed.blockNumber, processed.stamps);
+      if(processed.stamps.length > 0){
+        console.log(processed.blockNumber, "Stamps Found:" + processed.stamps.length);
+      }
       failCount = 0;
       currentBlock++;
       try {
         fs.writeFileSync("currentBlock.txt", currentBlock.toString());
+        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processed));
       } catch (err) {
         console.error('Error writing to file:', err);
       }
@@ -140,7 +139,7 @@ async function main() {
       console.log(`Failed to fetch block ${currentBlock}. Trying again`)
       failCount++;
     }
-    wait(1000);
+    //wait(1000);
   }
   
 

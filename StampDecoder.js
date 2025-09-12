@@ -168,7 +168,7 @@ class StampDecoder {
                           if(txResult.stampData.subasset){
                             currentStampData.subasset = txResult.stampData.subasset;
                           }
-                          
+
                           finalBlockData.stamps.push(currentStampData);
                         }
                     }
@@ -308,7 +308,7 @@ class StampDecoder {
             }
             cpMsg += raw.startsWith('434e545250525459') ? raw.substring(16) : raw;
           } else {
-            encoding = 'multisig (custom length)';
+            encoding = 'multisig';// (custom length)';
             raw = this.xcpRc4(utxo, raw);
             len = parseInt(this.hexToDec(raw.substring(0, 2)));
             if (isNaN(len) || len < 0 || len > (raw.length - 2) / 2) {
@@ -347,26 +347,29 @@ class StampDecoder {
         const id = parseInt(cpMsg.substring(0, 2), 16);
         cpMsg = cpMsg.substring(2);
         const blockHeightNum = result.bitcoinData.blockHeight === 'unknown' ? 0 : parseInt(result.bitcoinData.blockHeight);
+        let currentStampData;
 
         // check for normal olga issuances
         if (encoding != "multisig" && p2wshOutputs.length > 0 && (id === 20 || id === 22)) {
-            //console.log("ID", id, cpMsg);
-            result.stampData = { ...result.stampData, ...(await this.processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeightNum, id)) };
+            currentStampData = await this.processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeightNum, id);
         // check for normal classic stamp issuances
         } else if ((id === 20 || id === 22)) {
-            result.stampData = { ...result.stampData, ...(await this.processClassicStamp(tx, cpMsg, blockHeightNum, id)) };
+            currentStampData = await this.processClassicStamp(tx, cpMsg, blockHeightNum, id);
         // check for olga subasset issuances
         } else if ((id === 21 || id === 23) && blockHeightNum >= 753500) {
-            result.stampData = { ...result.stampData, ...(await this.processOlgaSubassetStamp(tx, cpMsg, p2wshOutputs, blockHeightNum, id)) };
+          currentStampData = await this.processOlgaSubassetStamp(tx, cpMsg, p2wshOutputs, blockHeightNum, id)
         } else {
             throw new Error(`Invalid Issuance or Subasset transaction: Message ID ${id}, Block Height ${blockHeightNum}`);
         }
-
-        return result;
+        if(currentStampData != false){
+          //console.log(encoding,currentStampData);
+          result.stampData = { ...result.stampData, ...(currentStampData) };
+          return result;
         }
+        throw Error("No Stamp found in " + json.hash)
+    }
     } catch (e) {
     // if we dont decode it, it didnt have any counterparty data in it... probably
-      //console.error(e);
       throw Error(e);
       //throw new Error(`Failed to decode transaction: ${e.message}`);
     }
@@ -391,7 +394,7 @@ class StampDecoder {
     if (descr.toLowerCase().startsWith('stamp:')) {
       return { ...stampData, ...(await this.parseStampContent(tx, descr)) };
     }
-    throw new Error('Expected Classic Stamp description starting with "stamp:"');
+    return false;
   }
 
   async processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
@@ -401,7 +404,7 @@ class StampDecoder {
     if (descr.toLowerCase().startsWith('stamp:')) {
         return { ...stampData, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
     }
-    throw new Error('Expected Olga Stamp processing error');
+    return false;
   }
 
   async processOlgaSubassetStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
@@ -419,7 +422,7 @@ class StampDecoder {
     if (descr.toLowerCase().startsWith('stamp:')) {
       return { ...stampData, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
     }
-    return { ...stampData, description: descr, descriptionHex: cpMsg.substring(lenSubasset * 2) };
+    return false;
   }
 
   async parseOlgaStamp(tx, assetHex, p2wshOutputs) {
