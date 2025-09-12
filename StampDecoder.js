@@ -57,46 +57,6 @@ class StampDecoder {
   // get the 
   async decodeRawBlock(blockHeight, blockHash, rawBlockData) {
     try {
-        /*
-        let blockHash = await this.getBlockHashByHeight(blockHeight);
-
-        // Fetch the raw block data
-        console.log('=== FETCHING DATA ===');
-        console.log(`Fetching raw block data for ${blockHeight} - ${blockHash}...`);
-        let rawBlockData;
-        let cacheHit = false;
-        //if we are using caching, try to get it from the local folder
-        if(cache){
-            try {
-              const data = fs.readFileSync("./blocks/" + blockHeight + '.dat');
-              console.log("File found reading block #" + blockHeight);
-              rawBlockData = Buffer.from(data);
-              cacheHit = true;
-            } catch (err) {
-              console.error('Block no found');
-            }
-        }
-        
-        // if our blockData is empty, get it from the internet, then save it for future use
-        if(!cacheHit){
-          console.log("No local block, fetching now...")
-          const response = await fetch(`https://mempool.space/api/block/${blockHash}/raw`);
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const arrayBuffer = await response.arrayBuffer();
-          rawBlockData = Buffer.from(arrayBuffer);
-          try {
-            fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
-            console.log("Block saved successfully" + blockHeight + '.dat');
-          } catch (err) {
-            console.error('Error writing file:', err);
-          }
-        }
-
-        //console.log(`Raw block size: ${rawBlockData.length} bytes`);
-        */
-        
         // Parse the raw block with bitcoinjs-lib
         const parsedBlock = bitcoin.Block.fromBuffer(rawBlockData);
         let finalBlockData = {};
@@ -153,7 +113,8 @@ class StampDecoder {
                             issuance: txResult.stampData.issuance,
                             mime: txResult.stampData.mimeType,
                             encoding: txResult.stampData.encoding,
-                            base64Data : txResult.stampData.base64Data
+                            base64Data : txResult.stampData.base64Data,
+                            locked: txResult.stampData.locked
                           }
                           if(txResult.stampData.subasset){
                             currentStampData.subasset = txResult.stampData.subasset;
@@ -372,7 +333,7 @@ class StampDecoder {
         asset: 'A' + BigInt('0x' + cpMsg.substring(0, 16)).toString(10),
         issuance: Number(BigInt('0x' + cpMsg.substring(16, 32))),
         divisible: parseInt(cpMsg.substring(32, 34), 16) ? true : false,
-        lock: parseInt(cpMsg.substring(34, 36), 16) ? true : false,
+        locked: parseInt(cpMsg.substring(34, 36), 16) ? true : false,
         reset: parseInt(cpMsg.substring(36, 38), 16) ? true : false
       });
   }
