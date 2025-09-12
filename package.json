@@ -4,6 +4,7 @@
     "canvas": "^3.2.0",
     "node-fetch": "^2.7.0",
     "node-html-parser": "^7.0.1",
-    "pako": "^2.1.0"
+    "pako": "^2.1.0",
+    "tiny-secp256k1": "^2.2.4"
   }
 }

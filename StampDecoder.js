@@ -1,8 +1,12 @@
+const fs = require('fs');
 const fetch = require('node-fetch');
 const pako = require('pako');
 const { parse } = require('node-html-parser');
 const { createCanvas, loadImage } = require('canvas');
 const bitcoin = require('bitcoinjs-lib');
+const ecc = require ("tiny-secp256k1");
+
+bitcoin.initEccLib(ecc);
 
 class StampDecoder {
   constructor(network = 'main') {
@@ -22,6 +26,32 @@ class StampDecoder {
       '9660860095ba470a9622b41ad7b594cb53dce5ade3c79cd2b226b27619bcd40a', // olga svg gzip
       '7c48691bf8cfafa66b1d938ada4c2c778c07a49c1a0683f969c29b94363a0fec'  // video mp4
     ];
+
+    this.mimeTypes = {
+      'image/gif': "gif",
+      'image/png': "png",
+      'image/jpeg': "jpeg",
+      'image/svg+xml': "svg",
+      'image/webp': "webp",
+      'application/gzip': "gz",
+      'application/json': "json",
+      'text/html': "html",
+    }
+  }
+
+  async getBlockTipHeight(){
+    try {
+        const response = await fetch(`https://mempool.space/api/blocks/tip/height`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const height = await response.text();
+        return height.trim(); // Remove any whitespace/newlines
+    } catch (error) {
+        console.error(`Error fetching block tip height:`, error);
+        return null;
+    } 
   }
 
   async getBlockHashByHeight(blockHeight) {
@@ -39,10 +69,10 @@ class StampDecoder {
         }
     }
 
-    getOutputScriptType(scriptString) {
+    getOutputScriptType(script) {
         try{
-            if(scriptString[0]== "6" && scriptString[1] =="a") return 'opreturn';
-            let address = bitcoin.address.fromOutputScript(scriptString);
+            if(script[0] == 0x6A ) return 'opreturn';
+            let address = bitcoin.address.fromOutputScript(script);
             if (address.startsWith('bc1q')) return 'segwit';
             if (address.startsWith('bc1p')) return 'taproot';
             if (address.startsWith('1')) return 'legacy';
@@ -54,21 +84,56 @@ class StampDecoder {
         }
       }
 
+  saveStamp(txHash,cpid,mimeType,base64Data){
+    try {
+      let dataFileName = `${txHash}.${this.mimeTypes[mimeType]}`;
+      fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(base64Data, 'base64'), { flag: 'w' });
+      fs.symlinkSync(dataFileName,"./s/"+cpid);
+      console.log(`Stamp ${cpid} saved successfully`);
+    } catch (err) {
+      console.error(`Error writing file:`, err);
+    }
+  }
+
   // get the 
-  async getAndDecodeRawBlock(blockHeight) {
+  async getAndDecodeRawBlock(blockHeight, cache) {
     try {
         let blockHash = await this.getBlockHashByHeight(blockHeight);
 
         // Fetch the raw block data
-        console.log(`Fetching raw block data for ${blockHash}...`);
+        console.log('=== FETCHING DATA ===');
+        console.log(`Fetching raw block data for ${blockHeight} - ${blockHash}...`);
+        let rawBlockData;
+        let cacheHit = false;
+        //if we are using caching, try to get it from the local folder
+        if(cache){
+            try {
+              const data = fs.readFileSync("./blocks/" + blockHeight + '.dat');
+              console.log("File found reading block #" + blockHeight);
+              rawBlockData = Buffer.from(data);
+              cacheHit = true;
+            } catch (err) {
+              console.error('Block no found');
+            }
+        }
         
-        const response = await fetch(`https://mempool.space/api/block/${blockHash}/raw`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // if our blockData is empty, get it from the internet, then save it for future use
+        if(!cacheHit){
+          console.log("No local block, fetching now...")
+          const response = await fetch(`https://mempool.space/api/block/${blockHash}/raw`);
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const arrayBuffer = await response.arrayBuffer();
+          rawBlockData = Buffer.from(arrayBuffer);
+          try {
+            fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
+            console.log("Block saves successfully" + blockHeight + '.dat');
+          } catch (err) {
+            console.error('Error writing file:', err);
+          }
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        const rawBlockData = Buffer.from(arrayBuffer);
         console.log(`Raw block size: ${rawBlockData.length} bytes`);
         
         // Parse the raw block with bitcoinjs-lib
@@ -76,17 +141,18 @@ class StampDecoder {
         
         console.log('=== BLOCK INFORMATION ===');
         console.log('Block Hash:', parsedBlock.getId());
-        console.log('Version:', parsedBlock.version);
-        console.log('Previous Block Hash:', parsedBlock.prevHash.toString('hex'));
-        console.log('Merkle Root:', parsedBlock.merkleRoot.toString('hex'));
-        console.log('Timestamp:', new Date(parsedBlock.timestamp * 1000).toISOString());
-        console.log('Bits:', parsedBlock.bits);
-        console.log('Nonce:', parsedBlock.nonce);
-        console.log('Transaction Count:', parsedBlock.transactions.length);
+        //console.log('Version:', parsedBlock.version);
+        //console.log('Previous Block Hash:', parsedBlock.prevHash.toString('hex'));
+        //console.log('Merkle Root:', parsedBlock.merkleRoot.toString('hex'));
+        //console.log('Timestamp:', new Date(parsedBlock.timestamp * 1000).toISOString());
+        //console.log('Bits:', parsedBlock.bits);
+        //console.log('Nonce:', parsedBlock.nonce);
+        //console.log('Transaction Count:', parsedBlock.transactions.length);
 
         // Decode all transactions
         console.log('\n=== TRANSACTIONS ===');
         const transactions = [];
+        let totalStampCount = 0;
 
         for (let i = 0; i < parsedBlock.transactions.length; i++) {
             const tx = parsedBlock.transactions[i];
@@ -108,7 +174,7 @@ class StampDecoder {
                             
                             return {
                                 index: idx,
-                                txid: input.hash.toString('hex'),
+                                txid: input.hash.reverse().toString('hex'),
                                 vout: input.index,
                                 scriptSig: {
                                     hex: scriptSig,
@@ -120,7 +186,7 @@ class StampDecoder {
                             // Handle cases where ASM conversion fails gracefully
                             return {
                                 index: idx,
-                                txid: input.hash.toString('hex'),
+                                txid: input.hash.reverse().toString('hex'),
                                 vout: input.index,
                                 scriptSig: {
                                     hex: input.script.toString('hex'),
@@ -163,14 +229,18 @@ class StampDecoder {
 
                 // go over every tx
                 
-                if(i==1465){
-                    console.log(JSON.stringify(txInfo));
-                    let txResult = await this.processTransaction(txInfo, tx.getId());
-                    if(txResult){
-                        console.log(txResult);
+
+                    try{
+                        let txResult = await this.processTransaction(txInfo, tx.getId());
+                        if(txResult){
+                          totalStampCount++;
+                          console.log("Stamp Found:",txResult.stampData.asset, txResult.stampData.mimeType, txResult.bitcoinData.txId);
+                          this.saveStamp(txResult.bitcoinData.txId, txResult.stampData.asset, txResult.stampData.mimeType, txResult.stampData.base64Data)
+                        }
                     }
-                }
-                //transactions.push(txInfo);
+                    catch(e){
+
+                    }
 
             } catch (txError) {
                 console.error(`Failed to decode transaction ${i}:`, txError.message);
@@ -183,6 +253,8 @@ class StampDecoder {
                 });
             }
         }
+        console.log("Stamps Found:", totalStampCount);
+        return true;
 
         /*
         return {
@@ -201,7 +273,7 @@ class StampDecoder {
 
     } catch (error) {
         console.error('Error fetching/decoding block:', error);
-        return null;
+        return false;
     }
 }
 
@@ -288,7 +360,7 @@ class StampDecoder {
       const result = {
         bitcoinData: {
           txId: json.hash || 'unknown',
-          blockHeight: json.block_height || 'unknown',
+          blockHeight: json.blockHeight || 'unknown',
           //blockTime: json.received ? new Date(json.received).toLocaleString() : 'unknown',
           //fromAddress: json.addresses?.[0] || 'unknown'
         },
@@ -298,51 +370,53 @@ class StampDecoder {
       const p2wshOutputs = [];
       let cpMsg = '';
       let encoding = '';
-      const utxo = json.inputs?.[0]?.prev_hash || 'unknown';
+      const utxo = json.inputs?.[0]?.txid|| 'unknown';
       let recipient = '0';
       let dustSat = 0;
 
       for (const [index, output] of (json.outputs || []).entries()) {
-        const type = output.script_type;
-        if (index === 0 && type === 'pay-to-pubkey-hash') {
-          recipient = output.addresses?.[0] || 'unknown';
-          dustSat = output.value || 0;
-        }
-        if (type === 'null-data') {
+        const type = output.type;
+
+
+        if (type === 'opreturn') {
           encoding = 'op_return';
-          const raw = this.xcpRc4(utxo, output.data_hex);
+          // slice the 0x6a and size bytes off the hex string
+          const raw = this.xcpRc4(utxo, output.script.slice(4));
           if (raw.startsWith('434e545250525459')) {
             cpMsg += raw;
+            //console.log(json.hash, "Counterparty tx found");
           } else {
-            console.error(`Invalid RC4 decryption for OP_RETURN: ${raw.substring(0, 16)}`);
+            throw new Error(`Invalid RC4 decryption for OP_RETURN: ${raw.substring(0, 16)}`);
           }
-        } else if (type === 'pay-to-multi-pubkey-hash') {
+        } else if (type === 'unknown') {
           let raw = output.script;
           let len;
+
           if (raw.length === 142) {
             encoding = 'op_return';
             len = parseInt(this.hexToDec(raw.substring(72, 74)));
             if (isNaN(len) || len < 0 || len > (raw.length - 74) / 2) {
-              console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
+              //console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
               continue;
             }
             raw = raw.substring(74, 74 + len * 2);
             if (!/^[0-9a-fA-F]+$/.test(raw)) {
-              console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
+              //console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
               continue;
             }
             cpMsg += raw;
           } else if (raw.length === 210) {
             encoding = 'multisig';
             raw = this.xcpRc4(utxo, raw.substring(6, 68) + raw.substring(74, 136));
+            //console.log(json.hash, raw);
             len = parseInt(this.hexToDec(raw.substring(0, 2)));
             if (isNaN(len) || len < 0 || len > (raw.length - 2) / 2) {
-              console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
+              //console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
               continue;
             }
             raw = raw.substring(2, 2 + len * 2);
             if (!/^[0-9a-fA-F]+$/.test(raw)) {
-              console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
+              //console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
               continue;
             }
             cpMsg += raw.startsWith('434e545250525459') ? raw.substring(16) : raw;
@@ -351,24 +425,27 @@ class StampDecoder {
             raw = this.xcpRc4(utxo, raw);
             len = parseInt(this.hexToDec(raw.substring(0, 2)));
             if (isNaN(len) || len < 0 || len > (raw.length - 2) / 2) {
-              console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
+              //console.error(`Invalid length in multisig script ${index}: len=${len}, script=${raw}`);
               continue;
             }
             raw = raw.substring(2, 2 + len * 2);
             if (!/^[0-9a-fA-F]+$/.test(raw)) {
-              console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
+              //console.error(`Invalid hex data in multisig script ${index}: ${raw}`);
               continue;
             }
             cpMsg += raw.startsWith('434e545250525459') ? raw.substring(16) : raw;
           }
           //console.log(`Multisig output ${index} (length ${output.script.length}): len=${len}, raw=${raw}`);
-        } else if (type === 'pay-to-witness-script-hash') {
-            if(cpMsg.startsWith('434e545250525459')){
-               cpMsg = cpMsg.substring(16);
-            }
+        } else if (type === 'segwit') {
           p2wshOutputs.push([output.script, output.value]);
         }
       }
+
+      if(cpMsg.startsWith('434e545250525459')){
+        cpMsg = cpMsg.substring(16);
+     }
+     //if(cpMsg.length > 0)
+     //   console.log("MESSAGE:", cpMsg);
 
       result.bitcoinData.recipient = recipient !== '0' ? recipient : undefined;
       if (dustSat > 0) {
@@ -377,18 +454,19 @@ class StampDecoder {
       }
 
       if (!cpMsg && p2wshOutputs.length === 0) {
+
         //console.log('No valid CP/Stamp data or P2WSH outputs found');
       }
       else{
-        console.log(cpMsg);
         const id = parseInt(cpMsg.substring(0, 2), 16);
         cpMsg = cpMsg.substring(2);
-        console.log(cpMsg);
-        console.log("ID", id);
+        //console.log("ID:",id,cpMsg);
+        //console.log("ID", id);
         const blockHeightNum = result.bitcoinData.blockHeight === 'unknown' ? 0 : parseInt(result.bitcoinData.blockHeight);
 
         // check for normal olga issuances
-        if (p2wshOutputs.length > 0 && (id === 20 || id === 22)) {
+        if (encoding != "multisig" && p2wshOutputs.length > 0 && (id === 20 || id === 22)) {
+            //console.log("ID", id, cpMsg);
             result.stampData = { ...result.stampData, ...(await this.processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeightNum, id)) };
         // check for normal classic stamp issuances
         } else if ((id === 20 || id === 22)) {
@@ -404,13 +482,14 @@ class StampDecoder {
         }
     } catch (e) {
     // if we dont decode it, it didnt have any counterparty data in it... probably
-      console.error(e);
+      //console.error(e);
+      throw Error(e);
       //throw new Error(`Failed to decode transaction: ${e.message}`);
     }
   }
 
  stampDataFromCpMsg(id, cpMsg){
-    console.log(cpMsg.substring(0, 16));
+    //console.log(cpMsg.substring(0, 16));
     return ({
         type: 'Issuance',
         messageId: id,
@@ -425,7 +504,7 @@ class StampDecoder {
   async processClassicStamp(tx, cpMsg, blockHeight, id) {
 
     const stampData = this.stampDataFromCpMsg(id, cpMsg);
-    console.log(stampData)
+    //console.log(stampData)
 
     cpMsg = cpMsg.substring(38);
     const descr = this.hex2a(cpMsg);
@@ -595,7 +674,7 @@ class StampDecoder {
       }
       return str;
     } catch (e) {
-      console.error('Error in hex2a:', e.message, { hex });
+      throw new Error('Error in hex2a:', e.message, { hex });
       return '';
     }
   }
