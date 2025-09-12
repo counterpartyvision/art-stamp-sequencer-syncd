@@ -2,6 +2,16 @@ const StampDecoder = require('./StampDecoder');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
+const mimeTypes = {
+  'image/gif': "gif",
+  'image/png': "png",
+  'image/jpeg': "jpeg",
+  'image/svg+xml': "svg",
+  'image/webp': "webp",
+  'application/gzip': "gz",
+  'application/json': "json",
+  'text/html': "html",
+}
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -18,8 +28,20 @@ function createDirectories() {
   });
 }
 
-function processSRC721(stampData){
+async function processStamp(stampData){
+    try {
+      let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
+      fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+      fs.symlinkSync(dataFileName,"./s/"+stampData.asset);
+      return true;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+}
 
+async function processSRC721(stampData){
+  console.log(stampData);
 }
 
 async function getBlockTipHeight(){
@@ -116,16 +138,27 @@ async function main() {
     // get the raw block
     let blockData = await getBlockData(currentBlock, blockHash, true);
     // process this block
-    let processed = await decoder.decodeRawBlock(currentBlock, blockHash, blockData);
-    if(processed){
-      if(processed.stamps.length > 0){
-        console.log(processed.blockNumber, "Stamps Found:" + processed.stamps.length);
+    let processedBlock = await decoder.decodeRawBlock(currentBlock, blockHash, blockData);
+    if(processedBlock){
+      if(processedBlock.stamps.length > 0){
+        console.log(processedBlock.blockNumber, "Stamps Found:" + processedBlock.stamps.length);
+        // if we have stamps to process in this block
+        if(processedBlock.stamps.length > 0){
+          // process them
+          for (let i=0; i< processedBlock.stamps.length; i++) {
+              let processedStamp = await processStamp(processedBlock.stamps[i]);
+              // we no longer need the base64 when we have created the files, so remove it
+              if(processedStamp){
+                delete processedBlock.stamps[i].base64Data
+              }
+          }
+        }
       }
       failCount = 0;
       currentBlock++;
       try {
         fs.writeFileSync("currentBlock.txt", currentBlock.toString());
-        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processed));
+        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock));
       } catch (err) {
         console.error('Error writing to file:', err);
       }

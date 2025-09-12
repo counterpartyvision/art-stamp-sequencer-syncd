@@ -54,17 +54,6 @@ class StampDecoder {
         }
       }
 
-  saveStamp(txHash,cpid,mimeType,base64Data){
-    try {
-      let dataFileName = `${txHash}.${this.mimeTypes[mimeType]}`;
-      fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(base64Data, 'base64'), { flag: 'w' });
-      fs.symlinkSync(dataFileName,"./s/"+cpid);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
   // get the 
   async decodeRawBlock(blockHeight, blockHash, rawBlockData) {
     try {
@@ -157,13 +146,14 @@ class StampDecoder {
                           totalStampCount++;
                           //console.log(JSON.stringify(txResult,0,2))
                           //console.log("Stamp Found:",txResult.stampData.asset, txResult.stampData.mimeType, txResult.bitcoinData.txId);
-                          let saveResult = this.saveStamp(txResult.bitcoinData.txId, txResult.stampData.asset, txResult.stampData.mimeType, txResult.stampData.base64Data)
+                          //let saveResult = this.saveStamp(txResult.bitcoinData.txId, txResult.stampData.asset, txResult.stampData.mimeType, txResult.stampData.base64Data)
                           let currentStampData = {
+                            txHash: txResult.bitcoinData.txId,
                             asset: txResult.stampData.asset,
                             issuance: txResult.stampData.issuance,
                             mime: txResult.stampData.mimeType,
                             encoding: txResult.stampData.encoding,
-                            saved: saveResult
+                            base64Data : txResult.stampData.base64Data
                           }
                           if(txResult.stampData.subasset){
                             currentStampData.subasset = txResult.stampData.subasset;
