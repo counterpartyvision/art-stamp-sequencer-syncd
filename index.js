@@ -18,7 +18,7 @@ function wait(ms) {
 }
 
 function createDirectories() {
-  const dirs = ['s', 'log'];
+  const dirs = ['s', 'log', 'src721'];
 
   dirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -28,20 +28,119 @@ function createDirectories() {
   });
 }
 
-async function processStamp(stampData){
+function saveSrc721Deploy(stampData, jsonData){
+  try{
+
+    const tKeys = Object.keys(jsonData).filter(key => /^t\d+$/.test(key));
+    // Iterate over each array
+    tKeys.forEach(key => {
+      // create a property to store an array of base64 data
+      jsonData[key+"-b64"] = [];
+      jsonData[key+"-b64"].length = jsonData[key].length
+      jsonData[key].forEach((item, index) => {
+        jsonData[key+"-b64"][index] = (fs.readFileSync("./s/"+item, 'base64'));
+      });
+    });
+    // save the src721 collection jsonData into the folder, then save the stamp like normal
+    let dataFileName = `${stampData.asset}.${mimeTypes[stampData.mime]}`;
+    fs.writeFileSync(`./src721/${dataFileName}`, JSON.stringify(jsonData), { flag: 'w' });
+    createSymlink(`../src721/${dataFileName}`,"./s/"+stampData.asset);
+    // make a directory to hold the items
+    fs.mkdirSync('./src721/' + stampData.asset, { recursive: true });
+    return saveStamp(stampData);
+  }
+  catch(e){
+    console.log(e);
+    return false;
+  }
+}
+
+function saveSrc721Mint(stampData, jsonData){
+  try{
+    // to save the actual json data at the txhash.json
+    let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
+    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+    // read the collection json
+    let collectionJSON = JSON.parse(fs.readFileSync(`./src721/${jsonData.c}.json`, 'utf8'));
+    const src721Traits = {};
+    jsonData.ts.forEach((index, i) => {
+      src721Traits[`t${i}`] = collectionJSON[`t${index}`];
+    });
+
+    // generate the src721 svg by using data from collection for viewbox and image-rendering, the stacking the traits
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewbox ="${collectionJSON.viewbox}" style="image-rendering:${collectionJSON["image-rendering"]}">`
+    for(let i=0; i< jsonData.ts.length; i++){
+        svgString += `<image href="${collectionJSON.type}, ${collectionJSON["t" + i + "-b64"][jsonData.ts[i]]}"></image>`;
+    }
+    svgString += "</svg>";
+    
+    // store the SVG as asset.svg and make a symlink to it
+    let svgPath = `./src721/${jsonData.c}/${stampData.asset}.svg`
+    fs.writeFileSync(svgPath, svgString, { flag: 'w' });
+    createSymlink("."+svgPath,"./s/"+stampData.asset);
+    return true;
+  }
+  catch(e){
+    console.log(e);
+    return false;
+  }
+}
+
+function createSymlink(targetPath, linkPath){
+  // try removing a symlink, this is needed if partially reindexing and updating paths
+  try { 
+    fs.unlinkSync(linkPath);
+  } 
+  catch (err) { 
+    /*do nothing if it doesnt exits*/
+  }
+  fs.symlinkSync(targetPath,linkPath);
+}
+
+function saveStamp(stampData){
+  try{
+    let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
+    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+    createSymlink(dataFileName,"./s/"+stampData.asset);
+    return true;
+  }
+  catch(e){
+    return false;
+  }
+}
+
+function processStamp(stampData){
     try {
-      let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
-      fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
-      fs.symlinkSync(dataFileName,"./s/"+stampData.asset);
-      return true;
+      if(stampData.mime === "application/json"){
+        let jsonData = JSON.parse(Buffer.from(stampData.base64Data, 'base64').toString('utf-8'));
+        if(jsonData.p.toLowerCase() === "src-721"){
+          return processSRC721(stampData, jsonData);
+        }
+      }
+
+      return saveStamp(stampData);
+
     } catch (err) {
       console.log(err);
       return false;
     }
 }
 
-async function processSRC721(stampData){
-  console.log(stampData);
+async function processSRC721(stampData, jsonData){
+  //console.log(stampData, jsonData)
+  if(jsonData.op.toLowerCase() === "deploy"){
+    console.log("SRC721 DEPLOY", stampData.asset, JSON.stringify(jsonData));
+    // save the deploy into the src721 folder
+    saveSrc721Deploy(stampData, jsonData);
+  }
+  // one of the requirements for src-721 mint is that the asset is issued locked at a single issuance
+  else if(stampData.locked && stampData.issuance === 1 && jsonData.op.toLowerCase() === "mint"){
+    saveSrc721Mint(stampData, jsonData);
+  }
+  // not a valid src721 deploy or mint, just save it like normal
+  else{
+    return saveStamp(stampData);
+  }
 }
 
 async function getBlockTipHeight(){
@@ -116,7 +215,9 @@ async function main() {
 
   // if there is not current block file, make one and start at the first stamp, 779652
   //const initialBlock = 779652;
-  const initialBlock = 792370; // src721 initial block?
+  const initialBlock = 788041; // src20 initial block
+  //const initialBlock = 792370; // src721 initial block
+  //const initialBlock = 792555; // src721 first valid
   let currentBlock = initialBlock;
   let failCount = 0;
   let blockTipHeight = await getBlockTipHeight();
@@ -150,6 +251,10 @@ async function main() {
               // we no longer need the base64 when we have created the files, so remove it
               if(processedStamp){
                 delete processedBlock.stamps[i].base64Data
+              }
+              else{
+                // if the stamp isnt processed properly, flag it with an error
+                processedBlock.stamps[i].error = true
               }
           }
         }
