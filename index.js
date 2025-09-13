@@ -214,8 +214,8 @@ async function main() {
   createDirectories();
 
   // if there is not current block file, make one and start at the first stamp, 779652
-  //const initialBlock = 779652;
-  const initialBlock = 788041; // src20 initial block
+  const initialBlock = 779652;
+  //const initialBlock = 788041; // src20 initial block
   //const initialBlock = 792370; // src721 initial block
   //const initialBlock = 792555; // src721 first valid
   let currentBlock = initialBlock;
@@ -263,7 +263,7 @@ async function main() {
       currentBlock++;
       try {
         fs.writeFileSync("currentBlock.txt", currentBlock.toString());
-        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock));
+        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock), { flag: 'w' });
       } catch (err) {
         console.error('Error writing to file:', err);
       }
