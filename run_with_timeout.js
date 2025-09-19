@@ -1,0 +1,1 @@
+const { exec } = require("child_process"); const timeout = 2 * 60 * 1000; exec("node index.js --minutes 2", (error, stdout, stderr) => { if (error) console.error(error); else console.log("Completed"); });
