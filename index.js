@@ -172,7 +172,7 @@ function processStamp(stampData){
         
         return processSRC721(stampData,jsonData);
       }
-      console.log(stampData);
+      //console.log(stampData);
 
       return saveStamp(stampData);
 
