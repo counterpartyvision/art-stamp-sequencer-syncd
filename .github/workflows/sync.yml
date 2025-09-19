@@ -1,8 +1,8 @@
 name: Art Stamps Sequencer
 on:
   schedule:
-    # Runs every 10 minutes starting at 00:00
-    - cron: '*/10 * * * *'
+    # Runs every 5 minutes starting at 00:00
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
