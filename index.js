@@ -1,6 +1,21 @@
 const StampDecoder = require('./StampDecoder');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const reorgBuffer = 2;
+
+const args = process.argv.slice(2);
+let reindexBlock = null;
+let cacheEnabled = true;
+
+// Parse all arguments
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--reindex' && i + 1 < args.length) {
+    reindexBlock = parseInt(args[i + 1]);
+    i++; // Skip the next argument as we've already processed it
+  } else if (args[i] === '--no-cache') {
+    cacheEnabled = false;
+  }
+}
 
 const mimeTypes = {
   'image/gif': "gif",
@@ -63,21 +78,31 @@ function saveSrc721Mint(stampData, jsonData){
     // read the collection json
     let collectionJSON = JSON.parse(fs.readFileSync(`./src721/${jsonData.c}.json`, 'utf8'));
     const src721Traits = {};
-    jsonData.ts.forEach((index, i) => {
-      src721Traits[`t${i}`] = collectionJSON[`t${index}`];
-    });
-
-    // generate the src721 svg by using data from collection for viewbox and image-rendering, the stacking the traits
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewbox ="${collectionJSON.viewbox}" style="image-rendering:${collectionJSON["image-rendering"]}">`
-    for(let i=0; i< jsonData.ts.length; i++){
-        svgString += `<image href="${collectionJSON.type}, ${collectionJSON["t" + i + "-b64"][jsonData.ts[i]]}"></image>`;
+    // if the src721 is html, 
+    if(collectionJSON.type === "data:text/html"){
+      let htmlPath = `./src721/${jsonData.c}/${stampData.asset}.html`;
+      fs.writeFileSync(`${htmlPath}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+      createSymlink("."+htmlPath,"./s/"+stampData.asset);
+      
     }
-    svgString += "</svg>";
-    
-    // store the SVG as asset.svg and make a symlink to it
-    let svgPath = `./src721/${jsonData.c}/${stampData.asset}.svg`
-    fs.writeFileSync(svgPath, svgString, { flag: 'w' });
-    createSymlink("."+svgPath,"./s/"+stampData.asset);
+    // otherwise do the image generation
+    else{
+      jsonData.ts.forEach((index, i) => {
+        src721Traits[`t${i}`] = collectionJSON[`t${index}`];
+      });
+
+      // generate the src721 svg by using data from collection for viewbox and image-rendering, the stacking the traits
+      let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewbox ="${collectionJSON.viewbox}" style="image-rendering:${collectionJSON["image-rendering"]}">`
+      for(let i=0; i< jsonData.ts.length; i++){
+          svgString += `<image href="${collectionJSON.type}, ${collectionJSON["t" + i + "-b64"][jsonData.ts[i]]}"></image>`;
+      }
+      svgString += "</svg>";
+      
+      // store the SVG as asset.svg and make a symlink to it
+      let svgPath = `./src721/${jsonData.c}/${stampData.asset}.svg`
+      fs.writeFileSync(svgPath, svgString, { flag: 'w' });
+      createSymlink("."+svgPath,"./s/"+stampData.asset);
+    }
     return true;
   }
   catch(e){
@@ -111,12 +136,27 @@ function saveStamp(stampData){
 
 function processStamp(stampData){
     try {
+      // if its a normal json file
       if(stampData.mime === "application/json"){
         let jsonData = JSON.parse(Buffer.from(stampData.base64Data, 'base64').toString('utf-8'));
         if(jsonData.p.toLowerCase() === "src-721"){
           return processSRC721(stampData, jsonData);
         }
       }
+      // if its another type of file, and the optext is 721 (probably html)
+      else if(stampData?.optext && stampData.optext.startsWith('721')){
+        const jsonParts = stampData.optext.split('|');
+        const jsonData = {};
+        
+        // Skip the first part which is "721", then put the rest into json
+        jsonParts.slice(1).forEach(part => {
+            const [key, value] = part.split(':');
+            jsonData[key] = value;
+        });
+        
+        return processSRC721(stampData,jsonData);
+      }
+      console.log(stampData);
 
       return saveStamp(stampData);
 
@@ -151,7 +191,7 @@ async function getBlockTipHeight(){
       }
       
       const height = await response.text();
-      return height.trim(); // Remove any whitespace/newlines
+      return parseInt(height.trim()) - reorgBuffer ; // Remove any whitespace/newlines and go to the
   } catch (error) {
       console.error(`Error fetching block tip height:`, error);
       return null;
@@ -185,24 +225,27 @@ async function getBlockData(blockHeight, blockHash, cache){
                 rawBlockData = Buffer.from(data);
                 cacheHit = true;
               } catch (err) {
-                console.error('Block no found');
+                console.error('Block not found');
               }
           }
           
           // if our blockData is empty, get it from the internet, then save it for future use
           if(!cacheHit){
-            console.log("No local block, fetching now...")
+            console.log(`No local block, fetching ${blockHeight} now...`);
             const response = await fetch(`https://mempool.space/api/block/${blockHash}/raw`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const arrayBuffer = await response.arrayBuffer();
             rawBlockData = Buffer.from(arrayBuffer);
-            try {
-              fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
-              console.log("Block saved successfully" + blockHeight + '.dat');
-            } catch (err) {
-              console.error('Error writing file:', err);
+            // if we are caching blocks, save them
+            if(cache){
+              try {
+                fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
+                console.log("Block saved successfully - " + blockHeight + '.dat');
+              } catch (err) {
+                console.error('Error writing file:', err);
+              }
             }
           }
 
@@ -218,26 +261,36 @@ async function main() {
   //const initialBlock = 788041; // src20 initial block
   //const initialBlock = 792370; // src721 initial block
   //const initialBlock = 792555; // src721 first valid
-  let currentBlock = initialBlock;
+
+  // if we have a command line to reindex a single block, then we need to just do that block
+  let currentBlock = reindexBlock ? reindexBlock : initialBlock;
+  console.log(reindexBlock, currentBlock);
+
   let failCount = 0;
   let blockTipHeight = await getBlockTipHeight();
-  try {
-    const data = fs.readFileSync("currentBlock.txt", "utf8");
-    currentBlock = parseInt(data.trim());
-    console.log("Current block???:", currentBlock);
-  } catch (err) {
-    console.error('File not found, creating it with default value...');
-    fs.writeFileSync("currentBlock.txt", ""+initialBlock);
-    console.log("Created file with default value: "+ initialBlock);
+  // if we arent reindexing, get block information from file
+  if(!reindexBlock){
+    try {
+      const data = fs.readFileSync("currentBlock.txt", "utf8");
+      currentBlock = parseInt(data.trim());
+      console.log("Current block:", currentBlock);
+    } catch (err) {
+      console.error('File not found, creating it with default value...');
+      fs.writeFileSync("currentBlock.txt", ""+initialBlock);
+      console.log("Created file with default value: "+ initialBlock);
+    }
+    console.log(`Beginning sequencer - currentBlock:${currentBlock}, blockTipHeight:${blockTipHeight}`);
+  }
+  else{
+    console.log(`Reindexing - currentBlock:${currentBlock}`);
   }
 
-  console.log(`Beginning sequencer - currentBlock:${currentBlock}, blockTipHeight:${blockTipHeight}`);
-
-  while(currentBlock < blockTipHeight){
+  // if we are reindexing a block, we just do that one. otherwise work toward the blockTipHeight
+  while(currentBlock < (reindexBlock ? reindexBlock + 1 : blockTipHeight)){
     // get the hash of this block number
     let blockHash = await getBlockHashByHeight(currentBlock);
-    // get the raw block
-    let blockData = await getBlockData(currentBlock, blockHash, true);
+    // get the raw block, pass the cacheEnabled flag
+    let blockData = await getBlockData(currentBlock, blockHash, cacheEnabled);
     // process this block
     let processedBlock = await decoder.decodeRawBlock(currentBlock, blockHash, blockData);
     if(processedBlock){
@@ -260,13 +313,16 @@ async function main() {
         }
       }
       failCount = 0;
-      currentBlock++;
+
       try {
         fs.writeFileSync("currentBlock.txt", currentBlock.toString());
         fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock), { flag: 'w' });
+        console.log(`Saving ${currentBlock.toString()}, Stamps Found:  ${processedBlock.stamps.length}`)
       } catch (err) {
         console.error('Error writing to file:', err);
       }
+      // after saving the current block, move onto the next one
+      currentBlock++;
     }
     else{
       

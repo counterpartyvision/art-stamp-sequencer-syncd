@@ -119,6 +119,9 @@ class StampDecoder {
                           if(txResult.stampData.subasset){
                             currentStampData.subasset = txResult.stampData.subasset;
                           }
+                          if(txResult.stampData.optext){
+                            currentStampData.optext = txResult.stampData.optext;
+                          }
 
                           finalBlockData.stamps.push(currentStampData);
                         }
@@ -353,7 +356,7 @@ class StampDecoder {
     cpMsg = cpMsg.substring(38);
     const descr = this.hex2a(cpMsg);
     if (descr.toLowerCase().startsWith('stamp:')) {
-        return { ...stampData, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
+        return { ...stampData, ...{optext:descr.slice(6) }, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
     }
     return false;
   }
