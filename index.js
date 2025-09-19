@@ -6,13 +6,29 @@ const reorgBuffer = 2;
 const args = process.argv.slice(2);
 let reindexBlock = null;
 let cacheEnabled = true;
+let runForMinutes = null;
+let waitTime = 2000; // Default wait time
+
 
 // Parse all arguments
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--reindex' && i + 1 < args.length) {
+  // total number of minutes to run for, useful with a cron job
+  if (args[i] === '--minutes' && i + 1 < args.length) {
+    runForMinutes = parseInt(args[i + 1]);
+    i++; // Skip the next argument as we've already processed it
+  }
+  // total time to wait between blocks, useful to not ddos the provider 
+  else if (args[i] === '--wait' && i + 1 < args.length) {
+    waitTime = parseInt(args[i + 1]);
+    i++; // Skip the next argument as we've already processed it
+  }
+  // block to reindex 
+  else if (args[i] === '--reindex' && i + 1 < args.length) {
     reindexBlock = parseInt(args[i + 1]);
     i++; // Skip the next argument as we've already processed it
-  } else if (args[i] === '--no-cache') {
+  } 
+  // are we saving all blocks? if not pass this
+  else if (args[i] === '--no-cache') {
     cacheEnabled = false;
   }
 }
@@ -253,6 +269,11 @@ async function getBlockData(blockHeight, blockHash, cache){
 }
 
 async function main() {
+  // Running for a certain number of minutes
+  const startTime = Date.now();
+  if (runForMinutes !== null) {
+    console.log(`Running for ${runForMinutes} minutes...`);
+  }
   const decoder = new StampDecoder('main'); // Use 'testnet' for testnet
   createDirectories();
 
@@ -264,7 +285,6 @@ async function main() {
 
   // if we have a command line to reindex a single block, then we need to just do that block
   let currentBlock = reindexBlock ? reindexBlock : initialBlock;
-  console.log(reindexBlock, currentBlock);
 
   let failCount = 0;
   let blockTipHeight = await getBlockTipHeight();
@@ -286,7 +306,10 @@ async function main() {
   }
 
   // if we are reindexing a block, we just do that one. otherwise work toward the blockTipHeight
-  while(currentBlock < (reindexBlock ? reindexBlock + 1 : blockTipHeight)){
+  while(
+    (runForMinutes === null || (Date.now() - startTime) < runForMinutes * 60 * 1000) &&
+    (reindexBlock ? currentBlock < reindexBlock + 1 : currentBlock < blockTipHeight)
+  ) {
     // get the hash of this block number
     let blockHash = await getBlockHashByHeight(currentBlock);
     // get the raw block, pass the cacheEnabled flag
@@ -333,7 +356,7 @@ async function main() {
       console.log(`Failed to fetch block ${currentBlock}. Trying again`)
       failCount++;
     }
-    //wait(1000);
+    wait(waitTime);
   }
   
 
