@@ -1,8 +1,7 @@
-const fs = require('fs');
+const cbor = require('cbor');
 const fetch = require('node-fetch');
 const pako = require('pako');
 const { parse } = require('node-html-parser');
-const { createCanvas, loadImage } = require('canvas');
 const bitcoin = require('bitcoinjs-lib');
 const ecc = require ("tiny-secp256k1");
 
@@ -329,7 +328,25 @@ class StampDecoder {
     }
   }
 
- stampDataFromCpMsg(id, cpMsg){
+ stampDataFromCpMsg(id, cpMsg, blockHeight){
+    
+    // try to cbor decode, if it doesnt work, fallback
+    if(blockHeight >= 902000){
+      try{
+        let result = cbor.decodeFirstSync(cpMsg);
+        return {
+          type: 'Issuance',
+          messageId: id,
+          asset: 'A' + BigInt(result[0]).toString(10),
+          issuance: Number(BigInt(result[1])),
+          divisible: result[2],
+          locked: result[3],
+          reset: result[4],
+          description: result[6].toString()
+        }
+      }
+      catch(e){}
+    }
     return ({
         type: 'Issuance',
         messageId: id,
@@ -342,9 +359,9 @@ class StampDecoder {
   }
 
   async processClassicStamp(tx, cpMsg, blockHeight, id) {
-    const stampData = this.stampDataFromCpMsg(id, cpMsg);
+    const stampData = this.stampDataFromCpMsg(id, cpMsg, blockHeight);
     cpMsg = cpMsg.substring(38);
-    const descr = this.hex2a(cpMsg);
+    const descr = stampData?.description ? stampData.description : this.hex2a(cpMsg);
     if (descr.toLowerCase().startsWith('stamp:')) {
       return { ...stampData, ...(await this.parseStampContent(tx, descr)) };
     }
@@ -352,9 +369,9 @@ class StampDecoder {
   }
 
   async processOlgaStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
-    let stampData = this.stampDataFromCpMsg(id, cpMsg);
+    let stampData = this.stampDataFromCpMsg(id, cpMsg, blockHeight);
     cpMsg = cpMsg.substring(38);
-    const descr = this.hex2a(cpMsg);
+    const descr = stampData?.description ? stampData.description : this.hex2a(cpMsg);
     if (descr.toLowerCase().startsWith('stamp:')) {
         return { ...stampData, ...{optext:descr.slice(6) }, ...(await this.parseOlgaStamp(tx, cpMsg, p2wshOutputs)) };
     }
@@ -362,7 +379,7 @@ class StampDecoder {
   }
 
   async processOlgaSubassetStamp(tx, cpMsg, p2wshOutputs, blockHeight, id) {
-    let stampData = this.stampDataFromCpMsg(id, cpMsg);
+    let stampData = this.stampDataFromCpMsg(id, cpMsg, blockHeight);
     cpMsg = cpMsg.substring(38);
     const lenSubasset = parseInt(cpMsg.substring(0, 2), 16);
     cpMsg = cpMsg.substring(2);
