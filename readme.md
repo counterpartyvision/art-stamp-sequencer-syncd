@@ -40,6 +40,27 @@ Art stamps may come in the following formats:
 
 ---
 
+### Runtime Flags
+
+The sequencer supports several command-line flags:
+
+- `--minutes <number>` - Run the indexer for a specified number of minutes (useful with cron jobs)
+- `--wait <number>` - Set wait time between blocks in milliseconds (default: 2000ms, useful to avoid DDoS'ing the provider)
+- `--reindex <block>` - Reindex a specific block number
+- `--no-cache` - Disable local block caching
+
+Example usage:
+```bash
+# Run for 30 minutes with custom wait time of 1500ms after a block is complete
+node index.js --minutes 30 --wait 1500
+
+# Reindex a specific block
+node index.js --reindex 780000
+
+# Disable caching and run for 1 hour
+node index.js --minutes 60 --no-cache
+```
+
 ## File Structure Output
 
 ```
