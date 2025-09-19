@@ -1,0 +1,41 @@
+name: Art Stamps Sequencer
+on:
+  schedule:
+    # Runs every 10 minutes starting at 00:00
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-sequencer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Run sequencer for 2 minutes
+      run: |
+        # Create a temporary script to limit runtime
+        echo 'const { exec } = require("child_process"); const timeout = 2 * 60 * 1000; exec("node index.js --minutes 2", (error, stdout, stderr) => { if (error) console.error(error); else console.log("Completed"); });' > run_with_timeout.js
+        node run_with_timeout.js
+    
+    - name: Commit changes
+      if: success()
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "Automated stamp processing run" || echo "No changes to commit"
+        git push origin ${{ github.ref }}
+      continue-on-error: true
