@@ -8,6 +8,7 @@ let reindexBlock = null;
 let cacheEnabled = true;
 let runForMinutes = null;
 let waitTime = 2000; // Default wait time
+let overwriteFlags = { flag: 'wx' }; // dont overwrite if the file exists
 
 
 // Parse all arguments
@@ -25,6 +26,8 @@ for (let i = 0; i < args.length; i++) {
   // block to reindex 
   else if (args[i] === '--reindex' && i + 1 < args.length) {
     reindexBlock = parseInt(args[i + 1]);
+    // if we are reindexing, we need to overwrite
+    overwriteFlags = { flag: 'w' };
     i++; // Skip the next argument as we've already processed it
   } 
   // are we saving all blocks? if not pass this
@@ -74,7 +77,7 @@ function saveSrc721Deploy(stampData, jsonData){
     });
     // save the src721 collection jsonData into the folder, then save the stamp like normal
     let dataFileName = `${stampData.asset}.${mimeTypes[stampData.mime]}`;
-    fs.writeFileSync(`./src721/${dataFileName}`, JSON.stringify(jsonData), { flag: 'w' });
+    fs.writeFileSync(`./src721/${dataFileName}`, JSON.stringify(jsonData), overwriteFlags);
     createSymlink(`../src721/${dataFileName}`,"./s/"+stampData.asset);
     // make a directory to hold the items
     fs.mkdirSync('./src721/' + stampData.asset, { recursive: true });
@@ -90,14 +93,14 @@ function saveSrc721Mint(stampData, jsonData){
   try{
     // to save the actual json data at the txhash.json
     let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
-    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), overwriteFlags);
     // read the collection json
     let collectionJSON = JSON.parse(fs.readFileSync(`./src721/${jsonData.c}.json`, 'utf8'));
     const src721Traits = {};
     // if the src721 is html, 
     if(collectionJSON.type === "data:text/html"){
       let htmlPath = `./src721/${jsonData.c}/${stampData.asset}.html`;
-      fs.writeFileSync(`${htmlPath}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+      fs.writeFileSync(`${htmlPath}`, Buffer.from(stampData.base64Data, 'base64'), overwriteFlags);
       createSymlink("."+htmlPath,"./s/"+stampData.asset);
       
     }
@@ -116,7 +119,7 @@ function saveSrc721Mint(stampData, jsonData){
       
       // store the SVG as asset.svg and make a symlink to it
       let svgPath = `./src721/${jsonData.c}/${stampData.asset}.svg`
-      fs.writeFileSync(svgPath, svgString, { flag: 'w' });
+      fs.writeFileSync(svgPath, svgString, overwriteFlags);
       createSymlink("."+svgPath,"./s/"+stampData.asset);
     }
     return true;
@@ -130,7 +133,9 @@ function saveSrc721Mint(stampData, jsonData){
 function createSymlink(targetPath, linkPath){
   // try removing a symlink, this is needed if partially reindexing and updating paths
   try { 
-    fs.unlinkSync(linkPath);
+    // if we are overwriting, remove the old link path, otherwise dont and the symlinkSync will fail if it it exists
+    if(overwriteFlags.flag === "w")
+      fs.unlinkSync(linkPath);
   } 
   catch (err) { 
     /*do nothing if it doesnt exits*/
@@ -141,7 +146,7 @@ function createSymlink(targetPath, linkPath){
 function saveStamp(stampData){
   try{
     let dataFileName = `${stampData.txHash}.${mimeTypes[stampData.mime]}`;
-    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), { flag: 'w' });
+    fs.writeFileSync(`./s/${dataFileName}`, Buffer.from(stampData.base64Data, 'base64'), overwriteFlags);
     createSymlink(dataFileName,"./s/"+stampData.asset);
     return true;
   }
@@ -257,7 +262,7 @@ async function getBlockData(blockHeight, blockHash, cache){
             // if we are caching blocks, save them
             if(cache){
               try {
-                fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData, { flag: 'w' });
+                fs.writeFileSync("./blocks/" + blockHeight + '.dat', rawBlockData);
                 console.log("Block saved successfully - " + blockHeight + '.dat');
               } catch (err) {
                 console.error('Error writing file:', err);
@@ -339,7 +344,7 @@ async function main() {
 
       try {
         fs.writeFileSync("currentBlock.txt", currentBlock.toString());
-        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock), { flag: 'w' });
+        fs.writeFileSync(`./log/${currentBlock.toString()}.json`, JSON.stringify(processedBlock), overwriteFlags);
         console.log(`Saving ${currentBlock.toString()}, Stamps Found:  ${processedBlock.stamps.length}`)
       } catch (err) {
         console.error('Error writing to file:', err);
