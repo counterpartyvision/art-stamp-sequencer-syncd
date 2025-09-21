@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <title>Snake Game</title>
+  </head>
+  <body>
+    <div id="score" style="text-align: center; font-size: 100px;">0</div>
+    <canvas id="snakeboard" width="400" height="400"></canvas>
+    <style>
+      #snakeboard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+    </style>
+  </body>
+  <script>
+    const board_border="black",board_background="white",snake_col="lightblue",snake_border="darkblue";let snake=[{x:200,y:200},{x:190,y:200},{x:180,y:200},{x:170,y:200},{x:160,y:200}],score=0,changing_direction=!1,food_x,food_y,dx=10,dy=0;const snakeboard=document.getElementById("snakeboard"),snakeboard_ctx=snakeboard.getContext("2d");function main(){has_game_ended()||(changing_direction=!1,setTimeout(function e(){clear_board(),drawFood(),move_snake(),drawSnake(),main()},100))}function clear_board(){snakeboard_ctx.fillStyle="grey",snakeboard_ctx.strokestyle="black",snakeboard_ctx.fillRect(0,0,snakeboard.width,snakeboard.height),snakeboard_ctx.strokeRect(0,0,snakeboard.width,snakeboard.height)}function drawSnake(){snake.forEach(drawSnakePart)}function drawFood(){snakeboard_ctx.fillStyle="red",snakeboard_ctx.strokestyle="black",snakeboard_ctx.fillRect(food_x,food_y,10,10),snakeboard_ctx.strokeRect(food_x,food_y,10,10)}function drawSnakePart(e){snakeboard_ctx.fillStyle="lightgreen",snakeboard_ctx.strokestyle="darkgreen",snakeboard_ctx.fillRect(e.x,e.y,10,10),snakeboard_ctx.strokeRect(e.x,e.y,10,10)}function has_game_ended(){for(let e=4;e<snake.length;e++)if(snake[e].x===snake[0].x&&snake[e].y===snake[0].y)return!0;let n=snake[0].x<0,o=snake[0].x>snakeboard.width-10,a=snake[0].y<0,d=snake[0].y>snakeboard.height-10;return n||o||a||d}function random_food(e,n){return 10*Math.round((Math.random()*(n-e)+e)/10)}function gen_food(){food_x=random_food(0,snakeboard.width-10),food_y=random_food(0,snakeboard.height-10),snake.forEach(function e(n){let o=n.x==food_x&&n.y==food_y;o&&gen_food()})}function change_direction(e){if(changing_direction)return;changing_direction=!0;let n=e.keyCode,o=-10===dy,a=10===dy,d=10===dx,t=-10===dx;37!==n||d||(dx=-10,dy=0),38!==n||a||(dx=0,dy=-10),39!==n||t||(dx=10,dy=0),40!==n||o||(dx=0,dy=10)}function move_snake(){let e={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(e);let n=snake[0].x===food_x&&snake[0].y===food_y;n?(score+=10,document.getElementById("score").innerHTML=score,gen_food()):snake.pop()}main(),gen_food(),document.addEventListener("keydown",change_direction);
+  </script>
+</html>
