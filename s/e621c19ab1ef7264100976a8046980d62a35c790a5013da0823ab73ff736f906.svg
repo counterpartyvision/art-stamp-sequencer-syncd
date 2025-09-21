@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="A" gradientTransform="rotate(0)"><stop offset="15%" stop-color="1"><animate attributeName="stop-color" values="0ff;00f;purple;f00;ff0;0f0;" dur="2s" repeatCount="indefinite"/></stop><stop offset="85%" stop-color="2"><animate attributeName="stop-color" values="0f0;0ff;00f;purple;f00;ff0;" dur="2s" repeatCount="indefinite"/></stop></linearGradient></defs><path fill="none" stroke="url(#A)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+	M10.4,20c6.4,20.1,14,4,16.5,7.8s4.8,22.6,8,23.5s5-12.1,7.2-17s3.9,32.2,5.8,22.2c4.4-24.2,3.4,23.1,9.8,24
+	c5.4,0.8,5.8-43.1,8.9-44.8s1.9,48.7,4,49.2c7.2,1.8,4.2-39.8,7.2-40.2s1.4-13.3,4-14.5c2.6-1.2,5.4,15.5,7.8,22.8"/>
+</svg>
