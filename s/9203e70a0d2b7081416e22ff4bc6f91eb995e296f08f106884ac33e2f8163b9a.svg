@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<style>
+text {fill:red;font:80px sans-serif;pointer-events:none}
+</style>
+<rect width="100%" height="99"
+onclick="o=(A=new AudioContext()).createOscillator();o.connect(A.destination);o.frequency.value=500;o.start(0);setTimeout('o.stop(0)',400)"/>
+<text y="75" width="100%">&#128056;</text>
+</svg>
