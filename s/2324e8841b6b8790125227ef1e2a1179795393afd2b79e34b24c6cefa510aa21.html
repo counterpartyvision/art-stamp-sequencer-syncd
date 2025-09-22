@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tetris on Bitcoin</title>
+    <style>
+      canvas{border:1px solid #000;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#121212}
+    </style>
+  </head>
+  <body>
+    <div id="score" style="text-align: center; font-size: 50px;">Tetris on Bitcoin</div>
+    <div id="points" style="text-align: center; font-size: 30px;">Points: 0</div>
+    <canvas id="canvas" width="240" height="480"></canvas>
+    <script>
+      let points=0;const SHAPES=[[[1,1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,1],[1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,0,0],[1,0,0],[1,1,1]],],COLORS=["#00FFFF","#FFA500","#FFFF00","#00FF00","#FF00FF","#0000FF","#FF0000"];let board,currentShape,currentColor,currentRow,currentCol,gameOver,speed;function initGame(){board=Array(20).fill().map(()=>Array(10).fill(0)),currentShape=randomShape(),currentColor=randomColor(),currentRow=0,currentCol=3,gameOver=!1,speed=500}function randomShape(){return SHAPES[Math.floor(Math.random()*SHAPES.length)]}function randomColor(){return COLORS[Math.floor(Math.random()*COLORS.length)]}function moveLeft(){!gameOver&&!checkCollision(currentShape,currentRow,currentCol-1)&&currentCol--}function moveRight(){!gameOver&&!checkCollision(currentShape,currentRow,currentCol+1)&&currentCol++}function moveDown(){!gameOver&&(checkCollision(currentShape,currentRow+1,currentCol)?(lockTetromino(),clearRows(),currentShape=randomShape(),currentColor=randomColor(),checkCollision(currentShape,currentRow=0,currentCol=3)&&(gameOver=!0,document.removeEventListener("keydown",handleKeyPress),alert("Game Over!"))):currentRow++)}function rotate(){if(!gameOver){let e=[];for(let r=0;r<currentShape[0].length;r++){e.push([]);for(let n=0;n<currentShape.length;n++)e[r][n]=currentShape[currentShape.length-n-1][r]}checkCollision(e,currentRow,currentCol)||(currentShape=e)}}function lockTetromino(){for(let e=0;e<currentShape.length;e++)for(let r=0;r<currentShape[0].length;r++)currentShape[e][r]&&(board[currentRow+e][currentCol+r]=currentColor)}function clearRows(){let e=0;for(let r=0;r<board.length;r++)board[r].every(e=>0!==e)&&(board.splice(r,1),board.unshift(Array(10).fill(0)),e++);switch(e){case 1:speed=400;break;case 2:speed=300;break;case 3:speed=200;break;case 4:speed=100}points+=10*e,document.getElementById("points").innerHTML="Points: "+points}function checkCollision(e,r,n){for(let t=0;t<e.length;t++)for(let o=0;o<e[0].length;o++)if(e[t][o]&&(r+t>=board.length||n+o<0||n+o>=board[0].length||board[r+t][n+o]))return!0;return!1}function draw(){let e=document.getElementById("canvas"),r=e.getContext("2d");r.clearRect(0,0,e.width,e.height);for(let n=0;n<board.length;n++)for(let t=0;t<board[0].length;t++)board[n][t]&&(r.fillStyle=board[n][t],r.fillRect(24*t,24*n,24,24));for(let o=0;o<currentShape.length;o++)for(let l=0;l<currentShape[0].length;l++)currentShape[o][l]&&(r.fillStyle=currentColor,r.fillRect((currentCol+l)*24,(currentRow+o)*24,24,24))}function handleKeyPress(e){switch(e.keyCode){case 37:moveLeft();break;case 38:rotate();break;case 39:moveRight();break;case 40:moveDown()}}initGame(),setInterval(()=>{draw(),moveDown()},speed),document.addEventListener("keydown",handleKeyPress);
+    </script>
+    </body>
+    </html>
