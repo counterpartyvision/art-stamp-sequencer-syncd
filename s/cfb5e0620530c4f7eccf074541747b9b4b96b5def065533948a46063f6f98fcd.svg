@@ -1,0 +1,14 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+//TEWZ 2023
+  <defs>
+    <radialGradient id="g" spreadMethod="repeat">
+     <stop offset="0%" stop-color="#FF007F" />
+<stop offset="25%" stop-color="#FFA500"/>
+<stop offset="50%" stop-color="#800080"/>
+<stop offset="75%" stop-color="#00FF00"/>
+<stop offset="100%" stop-color="#FF007F"/>
+    <animate attributeName="r" from=".1%" to=".6%" dur="500s" repeatCount="indefinite" /></radialGradient>
+  </defs>
+  <circle id="c" cx="50" cy="50" r="50" fill="url(#g)">
+  </circle>
+  </svg>
