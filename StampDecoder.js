@@ -34,6 +34,7 @@ class StampDecoder {
       'image/webp': "webp",
       'application/gzip': "gz",
       'application/json': "json",
+      'text/javascript': "js",
       'text/html': "html",
     }
   }
@@ -329,7 +330,6 @@ class StampDecoder {
   }
 
  stampDataFromCpMsg(id, cpMsg, blockHeight){
-    
     // try to cbor decode, if it doesnt work, fallback
     if(blockHeight >= 902000){
       try{
@@ -452,6 +452,41 @@ class StampDecoder {
         try { return JSON.parse(atob(base64Str)); } catch(e) { return false; }
     };
 
+    const htmlOrJs = (base64Str) => {
+        const normalized = atob(base64Str).trim();
+        if (normalized.length === 0) return 'unknown';
+        
+        // Check if it obviously starts with HTML
+        if (/^\s*<\s*(!doctype html|html|body|div|span|p|a|script|style)/i.test(normalized)) {
+            return 'text/html';
+        }
+        
+        // Check if it obviously starts with JavaScript
+        if (/^\s*(function|var\s+\w+|let\s+\w+|const\s+\w+|import|export)/i.test(normalized)) {
+            return 'text/javascript';
+        }
+        
+        // Fallback to tag counting
+        const htmlTags = (normalized.match(/<\s*(\w+)/gi) || []).length;
+        
+        // Count JS patterns
+        const jsPatterns = normalized.match(/function|var\s+\w+|let\s+\w+|const\s+\w+/gi) || [];
+        
+        if (htmlTags > 0 && htmlTags >= jsPatterns.length) {
+            return 'text/html';
+        }
+  
+        if (jsPatterns.length > 0 && jsPatterns.length >= htmlTags) {
+            return 'text/javascript';
+        }
+        
+        // Final fallback
+        if (htmlTags > 0) return 'text/html';
+        if (jsPatterns.length > 0) return 'text/javascript';
+        
+        return 'unknown';
+    }
+
     if (processedImage.startsWith('R0lGOD')) {
       fileType = 'image/gif';
     } else if (processedImage.startsWith('iVBORw')) {
@@ -467,7 +502,7 @@ class StampDecoder {
     } else if (isJson(image)){
         fileType = 'application/json';
     } else {
-      fileType = 'text/html';
+      fileType = htmlOrJs(image);
     }
 
     const stampData = {
