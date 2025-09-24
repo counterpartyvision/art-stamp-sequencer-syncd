@@ -1,0 +1,13 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">//TEWZ 2023
+  <defs>
+    <filter id="sc">
+      <feTurbulence result="tb">
+        <animate attributeName="baseFrequency" values=".03;30;396;30;.03" dur="3333s" repeatCount="indefinite" />
+      </feTurbulence>
+      <feComposite operator="in" in="tb" in2="SourceGraphic" result="composite"/>
+    </filter>
+  </defs>
+  <circle cx="50" cy="50" r="50" filter="url(#sc)" />
+<text x="30%" y="75%" fill="rgba(0, 0, 0, 0.02)" style="font-size: 500%;"   >₿</text>
+
+</svg>
