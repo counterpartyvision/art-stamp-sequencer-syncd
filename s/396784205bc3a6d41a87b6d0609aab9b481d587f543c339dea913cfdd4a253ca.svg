@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 313 309" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="j" x2="0%" y2="100%">
+<stop offset="0"/>
+<stop stop-color="green" offset="1"/>
+</linearGradient>
+</defs>
+<rect width="100%" height="100%" fill="url(#j)"/>
+<g fill="#0f0" font-family="monospace" font-size="20">
+<text x="100"><animate attributeName="y" dur="2.5s" from="10" repeatCount="indefinite" to="600"/>100</text>
+<text x="10"><animate attributeName="y" dur="2.1s" from="0" repeatCount="indefinite" to="800"/>10 001</text>
+<text x="80" y="30" font-family="monospace" font-size="20"><animate attributeName="y" dur="2.4s" from="0" repeatCount="indefinite" to="600"/> 10 101</text>
+<text x="20" y="40" font-family="monospace" font-size="20"><animate attributeName="y" dur="2.5s" from="50" repeatCount="indefinite" to="600"/> 101 11</text>
+<text x="120" y="50" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.6s" from="0" repeatCount="indefinite" to="1000"/> 1 001</text>
+<text x="150" y="60" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.7s" from="0" repeatCount="indefinite" to="500"/> 10 01 0111</text>
+<text x="250" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.8s" from="0" repeatCount="indefinite" to="600"/> 110</text>
+<text x="200" font-family="monospace" font-size="20"><animate attributeName="y" dur="3s" from="10" repeatCount="indefinite" to="600"/> 10 1 0</text>
+<text x="280" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.1s" from="0" repeatCount="indefinite" to="800"/> 1</text>
+<text x="30" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.2s" from="20" repeatCount="indefinite" to="600"/> 01</text>
+<text x="300" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.3s" from="0" repeatCount="indefinite" to="900"/> 0</text>
+<text x="120" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.4s" from="0" repeatCount="indefinite" to="600"/> 01 111</text>
+<text x="80" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.5s" from="0" repeatCount="indefinite" to="600"/> 1</text>
+<text x="70" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.6s" from="0" repeatCount="indefinite" to="900"/> 1000 111</text>
+<text x="90" font-family="monospace" font-size="20"><animate attributeName="y" dur="3.7s" from="0" repeatCount="indefinite" to="500"/> 1 1</text>
+<text x="190" font-family="monospace" font-size="20"><animate attributeName="y" dur="2.8s" from="0" repeatCount="indefinite" to="600"/> 1</text>
+</g>
+<path d="M31 259V156l27-33 217 32 2 104h-15v25H58v-12H41v-13H31Z"/>
+<path d="M84 316h43l127 1h14v-41h14v-23h21v-64h-21v-41h-14v-35h-14V95h-14V84h-14V72h-22V60h-28V49h-49v11H98v12H84v12H64v11H49v17H35v36H21v41H7v64h14v12h14v11h14v18h15v11h20v11z"/>
+<path d="M246 279v30H145v-3l-60-2-1-25h5v-10h11v-21H89v-11H79v-21H69v-84h10v-11h10v-11h12v-10h52v10h10v-10h63v10h10v11h10v32h22v84h-11v11h-11v11h-9v10h9v10z" fill="#66BC00"/>
+<path d="M226 142H69v32h146v-21h11v-11z" fill="#fff"/>
+<path d="M89 142v32H69v-21h10v-11h10z" fill="#0A050F"/>
+<path d="M215 195v10H69v-10h146z" clip-rule="evenodd" fill="#0A050F" fill-rule="evenodd"/>
+<path d="M215 195v10h11v-20H69v10h146zm0 22v-12H69v12h146z" fill="#D05512"/>
+<path d="m131 174h22v-42h10v-22h-10v22h-11v21h-11v21z" clip-rule="evenodd" fill="#497A0E" fill-rule="evenodd"/>
+<path d="m153 174h20v-32h-10v11h-10v21z" fill="#0A050F"/>
+<path d="M147 305v11h-20v-11H84v-11H64v-18H49v-11H35v-12H21v-64h14v-41h14v-36h15V95h20V84h14V72h29V60h49v12h28v12h22v11h14v18h14v35h14v41h14v64h-14v23h-14v41h-15v-41h15v-23h14v-64h-14v-29h-15v-24h-13v-12h-22v-12H98v12H84v12H64v24H49v29H35v64h14v12h15v11h20v18h43v11h20z" fill="#434343"/>
+<g filter="url(#i)">
+<path d="m29 139c-6 29 2 54 7 63 7 1 19 0 12-12-9-15 9-62 14-79 4-18-33-76-19-43 13 34-7 35-14 71z" fill="none">
+<animate attributeName="fill-opacity" dur="2s" repeatCount="indefinite" values="0.3;0.6;0.3"/>
+</path>
+</g>
+<g filter="url(#h)">
+<path d="m37 141c-5 9-4 18-3 22l1 2c-2-6 8-18 11-24s0-28 0-21c0 8-3 10-9 21z" fill="none"/>
+</g>
+<g filter="url(#g)">
+<path d="m41 118c-5 8-4 18-3 21l1 3c-2-6 8-18 11-24s0-29 0-22c0 8-3 11-9 22z" fill="none"/>
+</g>
+<g filter="url(#f)">
+<path d="m37 164c-4 9-2 18-1 22 2 2 4 6 2 2-3-6 6-20 7-26 2-6-4-28-3-21s-1 11-5 23z" fill="none"/>
+</g>
+<path d="M108 205v-10H51v10h57Z" clip-rule="evenodd" fill="#fff" fill-rule="evenodd"/>
+<path d="M51 205v-10H38v10h13Z" fill="#CD4316"/>
+<defs>
+<filter id="i" x="23" y="54" width="43" height="152" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur result="effect1_foregroundBlur_144_181" stdDeviation="2"/>
+</filter>
+<filter id="h" x="29" y="115" width="22" height="56" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur result="effect1_foregroundBlur_144_181" stdDeviation="2"/>
+</filter>
+<filter id="g" x="33" y="91" width="22" height="57" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur result="effect1_foregroundBlur_144_181" stdDeviation="2"/>
+</filter>
+<filter id="f" x="31" y="136" width="19" height="58" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur result="effect1_foregroundBlur_144_181" stdDeviation="2"/>
+</filter>
+</defs>
+</svg>
