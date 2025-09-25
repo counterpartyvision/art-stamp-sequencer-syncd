@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><script><![CDATA[
+    function gp() {
+      const bh = Math.floor(Math.random() * 360);
+      const bs = Math.floor(Math.random() * 21) + 30; 
+      const bl = Math.floor(Math.random() * 21) + 20;
+      const ns = Math.floor(Math.random() * 7) + 3;
+      const ss = [];
+
+      for (let i = 0; i < ns; i++) {
+        const lg = bl + (i * 10); // Increase lg by 10 for each shade
+        ss.push(`hsl(${bh}, ${bs}%, ${lg}%)`);
+      }
+
+      return ss;
+    }
+
+    const gs = 20;
+    const sq = gs / 3;
+    const ts = sq / Math.sqrt(2);
+    let ri; // Variable to hold the interval ID
+
+    function vg() {
+      const svg = document.querySelector("svg");
+
+      // Clear the SVG
+      while (svg.firstChild) {
+        svg.firstChild.remove();
+      }
+
+      const colorPalette = gp();
+
+      for (let x = 0; x < gs; x++) {
+        for (let y = 0; y < gs; y++) {
+          const xPos = x * sq;
+          const yPos = y * sq;
+
+          for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+              const tx = xPos + (j * ts);
+              const ty = yPos + (i * ts);
+
+              const tt = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+              tt.setAttribute("points", `${tx},${ty} ${tx + ts},${ty} ${tx},${ty + ts}`);
+              tt.setAttribute("fill", colorPalette[Math.floor(Math.random() * colorPalette.length)]);
+
+              svg.appendChild(tt);
+            }
+          }
+        }
+      }
+    }
+
+    function sr() {
+      vg();
+      ri = setInterval(vg, 690);
+    }
+
+    function pauseRefresh() {
+      clearInterval(ri);
+    }
+      sr();
+
+    document.addEventListener("click", function() {
+      if (ri) {
+        pauseRefresh();
+        ri = null;
+      } else {
+        sr();
+      }
+    });
+  ]]></script></svg>
