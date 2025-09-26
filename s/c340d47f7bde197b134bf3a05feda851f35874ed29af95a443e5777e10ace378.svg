@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Adobe Illustrator 24.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="24px" height="24px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#3D2313;}
+	.st1{fill:#DEC7AF;}
+	.st2{fill:#8C7463;}
+	.st3{fill:#8D7563;}
+	.st4{fill:#167B2E;}
+	.st5{fill:#027D36;}
+	.st6{fill:#3C2212;}
+	.st7{font-family:'DicoMonoSlab-Bold';}
+	.st8{font-size:4.6073px;}
+	.st9{fill:#AA1E12;}
+	.st10{fill:#0B7C33;}
+	.st11{fill:#3B2213;}
+	.st12{fill:#D6C7C8;}
+	.st13{fill:#9B1C1D;}
+	.st14{fill:#D69621;}
+	.st15{fill:#3D2315;}
+	.st16{fill:#007D39;}
+	.st17{fill:#A2928C;}
+	.st18{font-family:'AcademyEngravedLetPlain';}
+	.st19{font-size:0.3715px;}
+</style>
+<g id="Layer_3">
+	<rect x="0" y="0" class="st0" width="24" height="24"/>
+</g>
+<g id="Layer_4">
+	<rect x="1.98" y="1.98" class="st1" width="20.05" height="20.05"/>
+	<rect x="3.36" y="19.61" class="st2" width="17.5" height="1.15"/>
+	<rect x="3.36" y="6.16" class="st3" width="17.5" height="1.15"/>
+</g>
+<g>
+	
+		<rect x="14.43" y="18.22" transform="matrix(-1.836970e-16 1 -1 -1.836970e-16 34.0417 3.7571)" class="st4" width="1.42" height="1.35"/>
+	
+		<rect x="8.69" y="18.22" transform="matrix(-1.836970e-16 1 -1 -1.836970e-16 28.2974 9.5014)" class="st4" width="1.42" height="1.35"/>
+	<g>
+		<rect x="9.56" y="13.92" class="st5" width="5.37" height="2.85"/>
+		<text transform="matrix(1 0 0 1 2.3673 5.4662)" class="st6 st7 st8">WANTED</text>
+		<polygon class="st9" points="10.17,15.25 14.12,14.92 14.09,15.21 		"/>
+		<rect x="11.19" y="16.78" class="st10" width="2.1" height="2.83"/>
+		<circle class="st11" cx="11.57" cy="19.21" r="0.1"/>
+		<circle class="st11" cx="11.98" cy="19.11" r="0.1"/>
+		<circle class="st11" cx="12.88" cy="19.46" r="0.1"/>
+		<circle class="st11" cx="12.58" cy="19.21" r="0.1"/>
+		<circle class="st11" cx="13.13" cy="19.26" r="0.1"/>
+		<circle class="st11" cx="11.88" cy="19.51" r="0.1"/>
+		<circle class="st11" cx="12.33" cy="19.41" r="0.1"/>
+		<polyline class="st12" points="13.76,15.18 13.99,15 15.53,15.75 15.36,15.99 		"/>
+		<polygon class="st13" points="15.36,15.99 15.56,16.11 15.72,15.85 15.53,15.75 		"/>
+		<polyline class="st14" points="14.02,15.31 14.19,15.09 13.89,14.94 13.35,14.98 		"/>
+		<polygon class="st15" points="11.78,15.63 12.68,15.6 12.32,16.78 		"/>
+		<rect x="10.07" y="11" class="st16" width="4.34" height="2.94"/>
+		<polygon class="st15" points="10.45,13.15 10.43,12.5 11.96,12.91 		"/>
+		<rect x="12.59" y="12.15" width="1.53" height="1.36"/>
+		<rect x="14.04" y="12.69" width="0.38" height="0.27"/>
+		<polygon points="9.98,11.23 10.11,11 12.83,12.67 12.69,12.91 		"/>
+		<rect x="10.16" y="7.63" width="4.16" height="2.55"/>
+		<ellipse cx="12.23" cy="10.57" rx="5.73" ry="0.89"/>
+		<rect x="15.53" y="14.09" class="st17" width="0.29" height="1.4"/>
+		<rect x="10.07" y="18.19" width="1.18" height="1.42"/>
+		<polygon class="st11" points="10.08,12.34 9.39,12.61 10.08,11.81 		"/>
+		<polygon class="st11" points="10.08,13.09 9.39,13.36 10.08,12.56 		"/>
+		<polygon class="st11" points="14.41,11.81 15.1,12.61 14.41,12.34 		"/>
+		<polygon class="st11" points="14.41,12.56 15.1,13.36 14.41,13.09 		"/>
+		<rect x="13.29" y="18.19" width="1.18" height="1.42"/>
+	</g>
+</g>
+<text transform="matrix(1 0 0 1 19.7792 21.924)" class="st18 st19">HNFT PEPE</text>
+</svg>
