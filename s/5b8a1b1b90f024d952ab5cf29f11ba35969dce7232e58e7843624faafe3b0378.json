@@ -1,0 +1,1 @@
+{"p":"src-721","v":"3","c":"A5137985189791019000","op":"mint","name":"AI Art","symbol":"AIART","data":{"steps":40,"width":1024,"height":1024,"sampler":"K_DPM_2","seed":12345,"cfg_scale":4,"samples":1,"text_prompts":[{"text":"summer, red light in the night","weight":1},{"text":"purple","weight":-1}]}}
