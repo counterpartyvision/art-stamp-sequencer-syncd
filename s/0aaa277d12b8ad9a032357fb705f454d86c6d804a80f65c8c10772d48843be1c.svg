@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1284" height="1284"><title>'goose-pfp-613139' by Dmitri Cherniak</title><desc>seed=613139
+backgroundColor=#ffffff
+padding=0
+innerPadding=0
+timeout=3500
+dimension=1
+border=false
+Save=function(){return n.handleSave()}
+frame=354
+
+Rendered at Wed Oct 04 2023 13:57:41 GMT+0200 (Central European Summer Time)
+Generated in &lt;1ms
+</desc><defs></defs><rect width="100%" height="100%" fill="#ffffff"></rect><g><g id="0-0"><rect x="0" y="0" height="1284" width="1284" fill="#6BDCC5"></rect><g><rect id="0-0-3-2-4-7" x="385.20000000000005" y="256.8" width="513.6" height="898.8000000000001" fill="#ffffff"></rect><rect id="0-0-2-3-6-5" x="256.8" y="385.20000000000005" width="770.4000000000001" height="642" fill="#ffffff"></rect><rect id="0-0-4-8-2-2" x="513.6" y="1027.2" width="256.8" height="256.8" fill="#ffffff"></rect><rect id="0-0-1-7-8-1" x="128.4" y="898.8000000000001" width="1027.2" height="128.4" fill="#1263BD"></rect><rect id="0-0-3-6-4-2" x="385.20000000000005" y="770.4000000000001" width="513.6" height="256.8" fill="#1263BD"></rect><rect id="0-0-3-4-1-1" x="385.20000000000005" y="513.6" width="128.4" height="128.4" fill="#000000"></rect><rect id="0-0-6-4-1-1" x="770.4000000000001" y="513.6" width="128.4" height="128.4" fill="#000000"></rect></g><rect x="0" y="0" stroke="white" stroke-width="0" height="1284" width="1284" fill="none"></rect></g></g></svg>
