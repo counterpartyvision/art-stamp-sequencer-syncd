@@ -1,0 +1,101 @@
+<!DOCTYPE html><html><head><title>STAMPede</title><style>body{background:#333;color:#fff;font-family:Arial,sans-serif;text-align:center}#board{display:grid;grid-template-columns:repeat(5,50px);grid-template-rows:repeat(5,50px);justify-content:center;margin-top:20px}.cell{border:1px solid #fff;width:50px;height:50px}.cell.home{background-color:orange}.danger{background-color:red}.tokenX{color:red}.tokenO{color:#fff}#dice{padding:10px;margin-top:20px;cursor:pointer}#sb{margin-top:20px}.diceResult{font-size:20px;margin-top:10px}</style></head><body><h2>STAMPede</h2><div id="board"></div><button id="dice" onclick="rollDice()">Roll Dice</button><p id="diceResult" class="diceResult"></p><p id="st"></p><div id="sb"><span style="color:red">Kevin X:<span id="sX">0</span></span><span style="color:#fff">Luke O:<span id="sO">0</span></span></div><script>var boardSize = 5, endPos = 24;
+    var players = { X: 0, O: 0 };
+    var dangerSquares = [6, 13, 20];
+    var currentPlayer = 'X';
+    var s = { X: 0, O: 0 };
+    var diceButton = document.getElementById('dice');
+    var statusText = document.getElementById('st');
+    var moveInterval;
+
+    window.onload = function() {
+        createBoard();
+    };
+
+    function createBoard() {
+        const board = document.getElementById('board');
+        for (let i = 0; i < boardSize * boardSize; i++) {
+            let cell = document.createElement('div');
+            cell.className = 'cell' + (i === endPos ? ' home' : '') + (dangerSquares.includes(i) ? ' danger' : '');
+            board.appendChild(cell);
+        }
+        updateBoard();
+    }
+
+    function rollDice() {
+        diceButton.disabled = true;
+        statusText.innerText = '';
+        const diceResult = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('diceResult').innerText = 'Rolled: ' + diceResult;
+        document.getElementById('diceResult').style.color = currentPlayer === 'X' ? 'red' : 'white';
+        animateMove(currentPlayer, diceResult);
+    }
+
+    function animateMove(player, steps) {
+        var currentPos = players[player];
+        var finalPos = currentPos + steps;
+        if (finalPos > endPos) {
+            statusText.innerText = 'Roll was too high!';
+            switchTurn();
+            return;
+        }
+
+        moveInterval = setInterval(function() {
+            if (currentPos < finalPos) {
+                currentPos++;
+                updatePlayerPosition(player, currentPos);
+            } else {
+                clearInterval(moveInterval);
+                checkSquare(player, finalPos);
+            }
+        }, 500);
+    }
+
+    function updatePlayerPosition(player, newPos) {
+        players[player] = newPos;
+        updateBoard();
+    }
+
+    function checkSquare(player, newPos) {
+        var opponent = player === 'X' ? 'O' : 'X';
+        if (players[opponent] === newPos) {
+            players[opponent] = 0;
+            updateBoard();
+        }
+
+        if (dangerSquares.includes(newPos)) {
+            players[player] = 0;
+            statusText.innerText = 'Oh no! Hit a danger square!';
+            updateBoard();
+        } else if (newPos === endPos) {
+            statusText.innerText = (player === 'X' ? 'Kevin X' : 'Luke O') + ' Wins!';
+            updateScore(player);
+            resetGame();
+            return;
+        }
+
+        switchTurn();
+    }
+
+    function switchTurn() {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        diceButton.disabled = false;
+    }
+
+    function updateBoard() {
+        document.querySelectorAll('.cell').forEach(cell => cell.innerHTML = '');
+        Object.keys(players).forEach(player => {
+            const tokenCell = document.querySelectorAll('.cell')[players[player]];
+            tokenCell.innerHTML = '<span class="token' + player + '">' + player + '</span>';
+        });
+    }
+
+    function resetGame() {
+        players = { X: 0, O: 0 };
+        currentPlayer = 'X';
+        updateBoard();
+    }
+
+    function updateScore(player) {
+        s[player]++;
+        document.getElementById('s' + player).innerText = s[player];
+    }</script></body></html>
