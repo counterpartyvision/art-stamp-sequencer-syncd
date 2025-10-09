@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script>function setup() {
+  createCanvas(500, 500, WEBGL);
+}
+
+function draw() {
+  background(220);
+  rotateY(millis() / 2000);
+
+  for (let i = -5; i <= 5; ++i) {
+    for (let j = -5; j <= 5; ++j) {
+      for (let k = -5; k <= 5 ; ++k) {
+        let x = i * 50;
+        let y = j * 50;
+        let z = k * 50;
+        push();
+        translate(x, y, z);
+        stroke(100, 100, 200, 10);
+        fill(128 + x, 128 + y, 128 + z, 150);
+        box(10);
+        pop();
+      }
+    }
+  }
+}</script>
+</head>
+  
+<body>
+<canvas id="defaultCanvas0" class="p5Canvas" width="400" height="400" style="width: 400px; height: 400px;"></canvas>
+
+</body>
+</html>
