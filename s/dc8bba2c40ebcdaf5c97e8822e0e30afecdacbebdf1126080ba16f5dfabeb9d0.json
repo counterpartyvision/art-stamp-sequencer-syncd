@@ -1,0 +1,19 @@
+{
+  "p": "src-721",
+  "v": "r0",
+  "op": "deploy",
+  "name": "INFINITY SEED",
+  "symbol": "SEED",
+  "description": "Unleash a universe of visual splendor with INFINITY SEED, where each stroke and hue is a response to your input. In this interactive art series, your chosen seed—a number or a phrase—blooms into a digital tapestry of algorithmic beauty. Every creation is a singular event, a personal dialogue between you and the canvas of possibility. Curate your visual experience and watch as the algorithm weaves your unique narrative into a masterpiece of colors and forms.",
+  "max": "10000",
+  "operators": [
+    "bc1qwfmtwelj00pghxhg0nsu0jqx0f76d5nm0axxvt"
+  ],
+  "type": "data:text/html",
+  "params": [
+    "seed"
+  ],
+  "t0": [
+    "A14036122797260612249"
+  ]
+}
