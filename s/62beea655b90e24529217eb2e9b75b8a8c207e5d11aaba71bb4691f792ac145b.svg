@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-3.1 -2.7 5.8 5.8">
+
+	<!-- Santiago Itzcoatl ◆ 2024 -->
+
+<title>☯️🐸</title>
+<defs>
+<g id="p">
+<circle r="2" fill="#f32b18"/>
+<path d="M 0 -2 A 2 2 0 1 0 0 2" fill="#519a2f"/>
+<circle cy="-1" r="1" fill="#f32b18"/>
+<circle cy="1" r="1" fill="#519a2f"/>
+<ellipse cy="1" ry="0.56" rx="0.5" fill="#469025"/>
+<ellipse cy="-1" ry="0.56" rx="0.5" fill="#e9211e"/>
+<ellipse cy="1" ry="0.42" rx="0.38" fill="#fff"/>
+<ellipse cy="-1" ry="0.42" rx="0.38" fill="#fff"/>
+<circle cy="-1" r="0.2" fill="#000"/>
+<circle cy="1" r="0.2" fill="#000"/>
+<circle cy="-0.92" r="0.04" fill="#fff"/>
+<circle cy="1.08" r="0.04" fill="#fff"/>
+<circle cy="0.94" r="0.02" fill="#fff"/>
+<circle cy="-1.06" r="0.02" fill="#fff"/>
+</g>
+</defs>
+<rect fill="#519a2f" x="-2.9" y="-2.1" width="5" height="5"/>
+<rect fill="#f32b18" x="-2.7" y="-2.3" width="5" height="5"/>
+<rect fill="#1b2cf0" x="-2.5" y="-2.5" width="5" height="5"/>
+<use xlink:href="#p">
+<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0" to="360" begin="0s" dur="3s" repeatCount="indefinite"/>
+</use>
+</svg>
