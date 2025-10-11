@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="488" height="488">
+  <path fill="#fff" d="M0 0h488v488H0z" />
+  <circle cx="244" cy="244" r="200" fill="#f90" stroke="#000" stroke-width="2" />
+  <animateTransform attributeName="transform" attributeType="XML" dur="0.1s" repeatCount="indefinite" type="translate" values="-2 -2; 2 2; -2 -2" />
+  <path fill="none" stroke="#000" stroke-width="2" d="M44 244q200-200 400 0M44 244q200 200 400 0" />
+  <text x="244" y="244" dominant-baseline="middle" font-size="180" font-weight="bold" text-anchor="middle">₿</text>
+  <text x="244" y="244" dominant-baseline="middle" font-size="20" text-anchor="middle">₿</text>
+
+</svg>
