@@ -8,7 +8,7 @@ let reindexBlock = null;
 let cacheEnabled = true;
 let runForMinutes = null;
 let waitTime = 2000; // Default wait time
-let overwriteFlags = { flag: 'wx' }; // dont overwrite if the file exists
+let overwriteFlags = { flag: 'w' }; // overwrite existing files
 
 
 // Parse all arguments
@@ -52,7 +52,7 @@ function wait(ms) {
 }
 
 function createDirectories() {
-  const dirs = ['s', 'log', 'src721'];
+  const dirs = ['s', 'log', 'src721', 'blocks'];
 
   dirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
