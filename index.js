@@ -189,13 +189,13 @@ function processStamp(stampData){
 
 async function processSRC721(stampData, jsonData){
   //console.log(stampData, jsonData)
-  if(jsonData.op.toLowerCase() === "deploy"){
+  if(jsonData.op && jsonData.op.toLowerCase() === "deploy"){
     console.log("SRC721 DEPLOY", stampData.asset, JSON.stringify(jsonData));
     // save the deploy into the src721 folder
     saveSrc721Deploy(stampData, jsonData);
   }
   // one of the requirements for src-721 mint is that the asset is issued locked at a single issuance
-  else if(stampData.locked && stampData.issuance === 1 && jsonData.op.toLowerCase() === "mint"){
+  else if(stampData.locked && stampData.issuance === 1 && jsonData.op && jsonData.op.toLowerCase() === "mint"){
     saveSrc721Mint(stampData, jsonData);
   }
   // not a valid src721 deploy or mint, just save it like normal
