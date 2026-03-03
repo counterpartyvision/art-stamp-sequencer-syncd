@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100" width="300" height="300">
+    <!-- Clock face -->
+    <circle cx="0" cy="0" r="40" fill="white" stroke="black" stroke-width="2" />
+    <!-- Hour marks -->
+    <g id="hour-marks">
+        <line x1="0" y1="-35" x2="0" y2="-40" stroke="black" stroke-width="2" />
+        <line x1="30" y1="0" x2="35" y2="0" stroke="black" stroke-width="2" />
+        <line x1="0" y1="35" x2="0" y2="40" stroke="black" stroke-width="2" />
+        <line x1="-30" y1="0" x2="-35" y2="0" stroke="black" stroke-width="2" />
+    </g>
+    <!-- Hour hand -->
+    <line x1="0" y1="0" x2="0" y2="-20" stroke="black" stroke-width="3" id="hour-hand" />
+    <!-- Minute hand -->
+    <line x1="0" y1="0" x2="0" y2="-30" stroke="black" stroke-width="2" id="minute-hand" />
+    <!-- Second hand -->
+    <line x1="0" y1="0" x2="0" y2="-35" stroke="red" stroke-width="1" id="second-hand" />
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="1" fill="black" />
+    <!-- Digital clock -->
+    <text x="0" y="50" font-family="Arial" font-size="5" text-anchor="middle" id="digital-clock">00:00:00</text>
+    <!-- Script for updating clock -->
+    <script type="text/javascript">
+        <![CDATA[
+            function updateClock() {
+                var now = new Date();
+                var hours = now.getHours();
+                var minutes = now.getMinutes();
+                var seconds = now.getSeconds();
+
+                var hourHand = document.getElementById("hour-hand");
+                var minuteHand = document.getElementById("minute-hand");
+                var secondHand = document.getElementById("second-hand");
+                var digitalClock = document.getElementById("digital-clock");
+
+                // Update hour hand
+                hourHand.setAttribute("transform", "rotate(" + (hours * 30 + minutes * 0.5) + ")");
+
+                // Update minute hand
+                minuteHand.setAttribute("transform", "rotate(" + (minutes * 6) + ")");
+
+                // Update second hand
+                secondHand.setAttribute("transform", "rotate(" + (seconds * 6) + ")");
+
+                // Update digital clock
+                digitalClock.textContent = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
+            }
+
+            // Update clock every second
+            setInterval(updateClock, 1000);
+
+            // Initial update to avoid delay
+            updateClock();
+        ]]>
+    </script>
+</svg>
