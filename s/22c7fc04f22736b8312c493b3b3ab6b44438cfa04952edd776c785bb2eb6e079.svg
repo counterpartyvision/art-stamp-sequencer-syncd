@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="500" height="500">
+  <defs>
+    <pattern id="pattern1" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="white" />
+      <circle cx="5" cy="5" r="2" fill="red" />
+    </pattern>
+    <pattern id="pattern2" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="white" />
+      <circle cx="5" cy="5" r="2" fill="blue" />
+    </pattern>
+    <pattern id="pattern3" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="white" />
+      <circle cx="5" cy="5" r="2" fill="green" />
+    </pattern>
+    <pattern id="randomPattern" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="white" />
+      <circle cx="5" cy="5" r="2" fill="var(--circleColor)" />
+    </pattern>
+  </defs>
+  <style>
+    circle {
+      animation: rotation var(--duration) linear infinite;
+    }
+
+    @keyframes rotation {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(var(--rotateAngle));
+      }
+    }
+  </style>
+  <g transform="translate(50, 50)">
+    <circle cx="0" cy="0" r="50" fill="url(#pattern1)" style="--rotateAngle: 360; --duration: 6s;"></circle>
+    <circle cx="0" cy="0" r="30" fill="url(#pattern2)" style="--rotateAngle: -360; --duration: 8s;"></circle>
+    <circle cx="0" cy="0" r="20" fill="url(#pattern3)" style="--rotateAngle: 360; --duration: 10s;"></circle>
+    <circle cx="0" cy="0" r="15" fill="url(#randomPattern)" style="--rotateAngle: 360; --duration: 6s; --circleColor: red;"></circle>
+    <circle cx="0" cy="0" r="10" fill="url(#randomPattern)" style="--rotateAngle: -360; --duration: 8s; --circleColor: blue;"></circle>
+    <!-- Add more circles with patterns and adjusted rotation angles and durations -->
+  </g>
+  <script>
+    const circles = document.querySelectorAll('circle');
+    circles.forEach(circle => {
+      const randomColor = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
+      const randomSize = Math.random() * 4 + 1; // Random size between 1 and 5
+      const randomRotate = Math.random() > 0.5 ? 360 : -360; // Random rotation direction
+      const randomDuration = Math.random() * 10 + 5; // Random duration between 5 and 15 seconds
+      circle.style.setProperty('--circleColor', randomColor);
+      circle.style.setProperty('--rotateAngle', `${randomRotate}deg`);
+      circle.style.setProperty('--duration', `${randomDuration}s`);
+      circle.setAttribute('r', randomSize * 10);
+    });
+  </script>
+</svg>
