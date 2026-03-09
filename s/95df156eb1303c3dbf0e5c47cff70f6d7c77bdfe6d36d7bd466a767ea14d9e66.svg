@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="600" fill="#0000ff" />
+  
+  <!-- Mona Lisa -->
+  <!-- Face -->
+  <ellipse cx="200" cy="300" rx="160" ry="200" fill="#000000">
+    <!-- Shaking Animation -->
+    <animateTransform attributeName="transform" attributeType="XML"
+                      type="translate" from="0" to="5" dur="0.1s" repeatCount="indefinite" 
+                      additive="sum" accumulate="none"/>
+  </ellipse>
+  
+  <!-- Eyes (Squared and Red) -->
+  <rect x="110" y="230" width="40" height="40" fill="#ff0000" />
+  <rect x="250" y="230" width="40" height="40" fill="#ff0000" />
+  
+  <!-- Eyebrows -->
+  <path d="M90 220 Q130 200 160 220 T200 220" fill="none" stroke="#000000" stroke-width="5" />
+  <path d="M240 220 Q270 200 310 220 T350 220" fill="none" stroke="#000000" stroke-width="5" />
+  
+  <!-- Nose -->
+  <path d="M200 320 Q190 330 200 340 T210 330" fill="#000000" />
+  
+  <!-- Mouth -->
+  <path d="M170 360 Q200 400 230 360" fill="none" stroke="#000000" stroke-width="5" />
+  
+  <!-- Cracks on the face -->
+  <path id="scar1" d="M200 200 Q180 180 170 150" fill="none" stroke="#ffffff" stroke-width="5">
+    <!-- Animation for Scar 1 -->
+    <animate attributeName="d" attributeType="XML"
+             dur="2s" repeatCount="indefinite"
+             values="M200 200 Q180 180 170 150; M210 210 Q200 190 180 160; M200 200 Q180 180 170 150"
+             keyTimes="0;0.5;1" />
+  </path>
+  <path id="scar2" d="M200 200 Q220 180 230 150" fill="none" stroke="#ffffff" stroke-width="5">
+    <!-- Animation for Scar 2 -->
+    <animate attributeName="d" attributeType="XML"
+             dur="1.5s" repeatCount="indefinite"
+             values="M200 200 Q220 180 230 150; M210 210 Q230 190 240 160; M200 200 Q220 180 230 150"
+             keyTimes="0;0.5;1" />
+  </path>
+  <path id="scar3" d="M200 250 Q180 260 170 280" fill="none" stroke="#ffffff" stroke-width="5">
+    <!-- Animation for Scar 3 -->
+    <animate attributeName="d" attributeType="XML"
+             dur="2.3s" repeatCount="indefinite"
+             values="M200 250 Q180 260 170 280; M210 240 Q190 270 180 290; M200 250 Q180 260 170 280"
+             keyTimes="0;0.5;1" />
+  </path>
+  <path id="scar4" d="M200 250 Q220 260 230 280" fill="none" stroke="#ffffff" stroke-width="5">
+    <!-- Animation for Scar 4 -->
+    <animate attributeName="d" attributeType="XML"
+             dur="2.1s" repeatCount="indefinite"
+             values="M200 250 Q220 260 230 280; M210 240 Q230 270 240 290; M200 250 Q220 260 230 280"
+             keyTimes="0;0.5;1" />
+  </path>
+  
+  <!-- Mohawk hair extension (Green) -->
+  <path d="M160 100 Q200 40 240 100 Q200 0 160 100" fill="#00ff00">
+    <!-- Shaking Animation -->
+    <animateTransform attributeName="transform" attributeType="XML"
+                      type="translate" from="0" to="-5" dur="0.1s" repeatCount="indefinite" 
+                      additive="sum" accumulate="none"/>
+  </path>
+  
+  <!-- Teeth -->
+  <rect x="170" y="360" width="20" height="20" fill="#ffffff" />
+  <rect x="200" y="360" width="20" height="20" fill="#ffffff" />
+  <rect x="230" y="360" width="20" height="20" fill="#ffffff" />
+  
+  <!-- Pirate Scars -->
+  <path d="M170 250 Q160 240 150 220" fill="none" stroke="#ffffff" stroke-width="5" />
+  <path d="M230 250 Q240 240 250 220" fill="none" stroke="#ffffff" stroke-width="5" />
+  <path d="M180 320 Q180 310 170 300" fill="none" stroke="#ffffff" stroke-width="5" />
+  <path d="M220 320 Q220 310 230 300" fill="none" stroke="#ffffff" stroke-width="5" />
+</svg>
