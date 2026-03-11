@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proper distribution pie chart.</title>
+</head>
+<body>
+<svg id="mySvg" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="2000px" height="2000px" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd" viewBox="0 0 2000 2000">
+    <rect width="100%" height="100%" fill="black" />
+</svg>
+<script>
+    function createLine(x1, y1, x2, y2, color) {
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', '2');
+        return line;
+    }
+
+    function drawLines() {
+        var svgElement = document.getElementById('mySvg');
+        var centerX = 1000; 
+        var centerY = 1000;
+        var length = 999;  
+        var numberOfLines = 904;
+        var rotationStep = 0.3982300884955752; 
+        var colors = [
+            '#EE6666', 
+            '#F4A15F', 
+            '#FAC758', 
+            '#A6CB6F', 
+            '#5470C6', 
+            '#EA7CCC', 
+            '#FC8452', 
+            '#3BA272', 
+            '#73C0DE'  
+        ];
+        
+        for (var i = 0; i < numberOfLines; i++) {
+            var angle = i * rotationStep * Math.PI / 180;
+            var x2 = centerX + length * Math.sin(angle);
+            var y2 = centerY - length * Math.cos(angle);
+            var color = colors[i % colors.length]; 
+            var line = createLine(centerX, centerY, x2, y2, color);
+            svgElement.appendChild(line);
+        }
+    }
+
+    window.onload = drawLines;
+</script>
+</body>
+</html>
