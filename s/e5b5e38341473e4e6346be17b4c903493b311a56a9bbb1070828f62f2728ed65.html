@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: white;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        svg {
+            width: 100vmin;
+            height: 100vmin;
+        }
+        text {
+            font-size: 6px;
+            font-weight: bold;
+            text-anchor: start;
+            dominant-baseline: hanging;
+        }
+        @keyframes strokeChange {
+            0%, 100% {
+                stroke: black;
+            }
+            10% {
+                stroke: red;
+            }
+            20% {
+                stroke: black;
+            }
+        }
+        rect {
+            stroke: black;
+            animation: strokeChange 1.69s infinite;
+        }
+    </style>
+    <title>Recursive This</title>
+</head>
+<body>
+    <div class="container">
+        <svg viewBox="0 0 420 420">
+            <script type="text/javascript">
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.querySelector('svg');
+                const sizeDecrease = 15;
+                const startSize = 420;
+                const startX = 210;
+                const startY = 210;
+                const numOfRectangles = 28;
+
+                for (let i = 0; i < numOfRectangles; i++) {
+                    const size = startSize - i * sizeDecrease;
+                    const x = startX + i * 4 - size / 2;
+                    const y = startY - i * 4 - size / 2;
+
+                    // Create rectangle
+                    const rect = document.createElementNS(svgNS, 'rect');
+                    rect.setAttribute('x', x);
+                    rect.setAttribute('y', y);
+                    rect.setAttribute('width', size);
+                    rect.setAttribute('height', size);
+                    rect.setAttribute('stroke-width', 2);
+                    rect.setAttribute('fill', 'none');
+                    rect.style.animationDelay = `${i * 0.03}s`;
+
+                    // Create text
+                    if (i < numOfRectangles - 1) {
+                        const textX = startX + (i + 0.5) * 4 - size / 2;
+                        const textY = startY - (i + 1.5) * 4 - size / 2 + size;
+                        const text = document.createElementNS(svgNS, 'text');
+                        text.setAttribute('x', textX);
+                        text.setAttribute('y', textY);
+                        text.textContent = 'This';
+                        svg.appendChild(text);
+                    }
+
+                    svg.appendChild(rect);
+                }
+            </script>
+        </svg>
+    </div>
+</body>
+</html>
