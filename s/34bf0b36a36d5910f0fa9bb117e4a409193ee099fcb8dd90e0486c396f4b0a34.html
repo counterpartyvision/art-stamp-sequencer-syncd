@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Generator</title>
+    <style>
+        body{background-color:white;display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;margin:0}
+        canvas{border:1px solid black;background-color:white}
+        button{width:420px;padding:15px;margin-top:20px;background-color:#F7931A;color:white;border:none;border-radius:5px;box-shadow:0 5px #d47408;font-size:18px;cursor:pointer;transition:background-color 0.5s ease;opacity:0;transition:opacity 0.5s ease}
+        button.visible{opacity:1}
+        button.flash{animation:flash 0.5s infinite alternate}
+        @keyframes flash{from{background-color:#F7931A;opacity:1}to{background-color:#ffa64d;opacity:0.5}}
+        button:active{box-shadow:0 3px #d47408;transform:translateY(2px)}
+        @keyframes flashIcon{from{opacity:1}to{opacity:0.5}}
+    </style>
+</head>
+<body>
+    <canvas id="mazeCanvas" width="420" height="420"></canvas>
+    <button id="mazeButton" onclick="showSolution()">KEVIN IS GONNA MAKE IT!</button>
+    <script>
+        let cols, rows, grid=[], stack=[], current, entry, exit, path=[], canvas, ctx, animating=false;
+        let firstImg = new Image();
+        firstImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAJ1BMVEUAAAAAAACygW2ZYkW9inV1amWJSiiDdG2Eobake2RrV1GViocTZhPAKuOaAAAAAXRSTlMAQObYZgAAARdJREFUGNNtz79qwzAQBvD4DXIWqWN5ihICHROZQlchumcwgXgSAe0JhEA7uZM7uhSDxg5e0slD8eBXyEP1LP9phnyTfhz3cRrdDWBuecaMBzrVoa7fDoODkoBXxdCPS8K5oj/9RgBrxpbqUpfteEIYRnudg5P1HKrYLniFy5qo33PrCP3F2Op1a+2gMejixuZzRje2j0YEXAF+Tu2+s4vI9V1eP3K67c1YKMWSxq0LIkQoZU5P1lFEhORSvtBv2ze5uOhQPHZ24LiQUqK7/zlHthB4wQRtA3jPjGW73g4DgLWh/9ZaP2fRYHfOuYGNBWbaFGRqqEsefGOIAmiZJnvfZFyr1N6bolcA+6dpmoxxuTHXGo2v0R+W302up9C9QgAAAABJRU5ErkJggg==';
+
+        let pepeImg = new Image();
+        pepeImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAXVBMVEUAAAAAAADBWxX+/v7lJADJxqrn5uLl5N7i4dnc2s7Y18fNyrHFwqK/u5fS0LzBvZnX1MPOzbW9uZKjlkbz8/O6soW2r32upWUikwDt7e26t4unnFOQfgV5ZwAREACtwWmjAAAAAXRSTlMAQObYZgAAAKFJREFUKM+9jNkOwiAQRXtB9q173f//M4W2iBgTn/RkQib3MLf5G1j5kN9v5z68O0Q4t5wZriuHwXZwUo/eniRtSyncPEyQzDKvjQNJYKsKondAr9wwp7wYJqSQqV8BhNI4u9BG+TCqCxAP6DHNagCESQi1mC43HZLYVGtb0y2IWSILQhp4xtk1X8Q8i7i/0jwFEN99L6w/iqj4LnJ/XfgbHkfYBV+72GjZAAAAAElFTkSuQmCC';
+        
+        function generateMaze(width, height) {
+            cols = Math.floor(width / 20);
+            rows = Math.floor(height / 20);
+            grid = [];
+            stack = [];
+            path = [];
+            current = null;
+            animating = false;
+
+            function Cell(x, y) {
+                this.x = x;
+                this.y = y;
+                this.walls = [true, true, true, true];
+                this.visited = false;
+                this.previous = null;
+                this.checkNeighbors = function() {
+                    const neighbors = [];
+                    const top = grid[index(x, y - 1)];
+                    const right = grid[index(x + 1, y)];
+                    const bottom = grid[index(x, y + 1)];
+                    const left = grid[index(x - 1, y)];
+                    if (top && !top.visited) neighbors.push(top);
+                    if (right && !right.visited) neighbors.push(right);
+                    if (bottom && !bottom.visited) neighbors.push(bottom);
+                    if (left && !left.visited) neighbors.push(left);
+                    if (neighbors.length > 0) return neighbors[Math.floor(Math.random() * neighbors.length)];
+                }
+            }
+
+            function index(x, y) {
+                if (x < 0 || y < 0 || x >= cols || y >= rows) return -1;
+                return x + y * cols;
+            }
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    grid.push(new Cell(x, y));
+                }
+            }
+
+            entry = grid[0];
+            exit = grid[grid.length - 1];
+            current = entry;
+            current.visited = true;
+
+            canvas = document.getElementById('mazeCanvas');
+            canvas.width = width;
+            canvas.height = height;
+            ctx = canvas.getContext('2d');
+
+            function draw() {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+                for (let i = 0; i < grid.length; i++) {
+                    const cell = grid[i];
+                    const x = cell.x * 20;
+                    const y = cell.y * 20;
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    if (cell.walls[0]) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 20, y); ctx.stroke(); }
+                    if (cell.walls[1]) { ctx.beginPath(); ctx.moveTo(x + 20, y); ctx.lineTo(x + 20, y + 20); ctx.stroke(); }
+                    if (cell.walls[2]) { ctx.beginPath(); ctx.moveTo(x + 20, y + 20); ctx.lineTo(x, y + 20); ctx.stroke(); }
+                    if (cell.walls[3]) { ctx.beginPath(); ctx.moveTo(x, y + 20); ctx.lineTo(x, y); ctx.stroke(); }
+                }
+                ctx.fillStyle = 'green';
+                ctx.fillRect(entry.x * 20 + 2, entry.y * 20 + 2, 16, 16);
+                ctx.fillStyle = 'red';
+                ctx.fillRect(exit.x * 20 + 2, exit.y * 20 + 2, 16, 16);
+            }
+
+            function removeWalls(a, b) {
+                const x = a.x - b.x;
+                if (x === 1) { a.walls[3] = false; b.walls[1] = false; }
+                else if (x === -1) { a.walls[1] = false; b.walls[3] = false; }
+                const y = a.y - b.y;
+                if (y === 1) { a.walls[0] = false; b.walls[2] = false; }
+                else if (y === -1) { a.walls[2] = false; b.walls[0] = false; }
+            }
+
+            function step() {
+                draw();
+                const next = current.checkNeighbors();
+                if (next) {
+                    next.visited = true;
+                    next.previous = current;
+                    stack.push(current);
+                    removeWalls(current, next);
+                    current = next;
+                } else if (stack.length > 0) {
+                    current = stack.pop();
+                }
+
+                if (stack.length > 0) {
+                    requestAnimationFrame(step);
+                } else {
+                    findPath();
+                    placeIcons();
+                    document.getElementById("mazeButton").classList.add("visible");
+                }
+            }
+
+            step();
+        }
+
+        function findPath() {
+            let temp = exit;
+            path = [];
+            while (temp !== null) {
+                path.push(temp);
+                temp = temp.previous;
+            }
+            path.reverse();
+        }
+
+        function placeIcons() {
+            const initialCell = path[0];
+            ctx.drawImage(firstImg, initialCell.x * 20 - 5, initialCell.y * 20 - 5, 30, 30);
+        }
+
+        function animatePath() {
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < path.length) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    draw();
+                    for (let j = 0; j <= i; j++) {
+                        const cell = path[j];
+                        const img = j === i ? firstImg : pepeImg;
+                        ctx.drawImage(img, cell.x * 20 - 5, cell.y * 20 - 5, 30, 30);
+                    }
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    replaceIcons();
+                    document.getElementById("mazeButton").innerText = "WE ARE ALL KEVIN!";
+                    document.getElementById("mazeButton").classList.add("flash");
+                }
+            }, 100);
+        }
+
+        function replaceIcons() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            draw();
+            for (let j = 0; j < path.length; j++) {
+                const cell = path[j];
+                ctx.drawImage(firstImg, cell.x * 20 - 5, cell.y * 20 - 5, 30, 30);
+            }
+            for (let j = 0; j < path.length; j++) {
+                const cell = path[j];
+                const iconElement = document.createElement('img');
+                iconElement.src = firstImg.src;
+                iconElement.style.position = 'absolute';
+                iconElement.style.left = `${cell.x * 20 + canvas.offsetLeft - 5}px`;
+                iconElement.style.top = `${cell.y * 20 + canvas.offsetTop - 5}px`;
+                iconElement.style.width = '30px';
+                iconElement.style.height = '30px';
+                iconElement.style.animation = 'flashIcon 0.5s infinite alternate';
+                document.body.appendChild(iconElement);
+            }
+        }
+
+        function showSolution() {
+            if (!animating) {
+                animating = true;
+                animatePath();
+            }
+        }
+
+        window.draw = function() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < grid.length; i++) {
+                const cell = grid[i];
+                const x = cell.x * 20;
+                const y = cell.y * 20;
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                if (cell.walls[0]) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 20, y); ctx.stroke(); }
+                if (cell.walls[1]) { ctx.beginPath(); ctx.moveTo(x + 20, y); ctx.lineTo(x + 20, y + 20); ctx.stroke(); }
+                if (cell.walls[2]) { ctx.beginPath(); ctx.moveTo(x + 20, y + 20); ctx.lineTo(x, y + 20); ctx.stroke(); }
+                if (cell.walls[3]) { ctx.beginPath(); ctx.moveTo(x, y + 20); ctx.lineTo(x, y); ctx.stroke(); }
+            }
+            ctx.fillStyle = 'green';
+            ctx.fillRect(entry.x * 20 + 2, entry.y * 20 + 2, 16, 16);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(exit.x * 20 + 2, exit.y * 20 + 2, 16, 16);
+        };
+
+        generateMaze(420, 420);
+    </script>
+</body>
+</html>
