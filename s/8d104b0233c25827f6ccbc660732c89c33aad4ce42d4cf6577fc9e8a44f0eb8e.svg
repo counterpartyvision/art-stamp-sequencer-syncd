@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<filter id="a">
+<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"></feColorMatrix>
+</filter>
+<filter id="e">
+<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 0.965 0 0 0 0 0.11 0 0 0 0 0.102 0 0 0 1 0"></feColorMatrix>
+</filter>
+<filter id="d">
+<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 0.953 0 0 0 0 0.008 0 0 0 0 0.043 0 0 0 1 0"></feColorMatrix>
+</filter>
+<filter id="c">
+<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 0.165 0 0 0 0 0.302 0 0 0 0 0.694 0 0 0 1 0"></feColorMatrix>
+</filter>
+<filter id="b">
+<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 0.204 0 0 0 0 0.482 0 0 0 0 0.702 0 0 0 1 0"></feColorMatrix>
+</filter>
+</defs>
+<rect width="240" height="240" fill="#FEFFFA"/>
+<image x="5" y="5" filter="url(#a)" image-rendering="pixelated" xlink:href="/s/A888935190889488158"/>
+<image x="21" y="20" filter="url(#e)" image-rendering="pixelated" xlink:href="/s/A828986174108688848"/>
+<image x="27" y="22" filter="url(#d)" image-rendering="pixelated" xlink:href="/s/A838385944738880288"/>
+<image x="18" y="18" filter="url(#c)" image-rendering="pixelated" xlink:href="/s/A869219088868836848"/>
+<image x="20" y="20" filter="url(#b)" image-rendering="pixelated" xlink:href="/s/A888860984614241888"/>
+<image x="5" y="155" filter="url(#a)" image-rendering="pixelated" xlink:href="/s/A828742788830078808"/>
+</svg>
