@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="450">
+    <path fill="#0B0B0B" d="M0 0h450v450H0z" />
+    <text style="font-family:CourierNewPS-BoldMT,Courier New,monospace;white-space:pre;font-weight:bold" fill="#FF1B1B" fill-rule="evenodd" font-size="21">
+        <tspan x="102" y="71" xml:space="preserve">         _.__        </tspan>
+        <tspan x="102" y="94" xml:space="preserve">    _,^"   "^x,     </tspan>
+        <tspan x="102" y="117" xml:space="preserve">   x7'        `4,   </tspan>
+        <tspan x="102" y="140" xml:space="preserve"> XX7            4XX </tspan>
+        <tspan x="102" y="163" xml:space="preserve"> XX              XX </tspan>
+        <tspan x="102" y="186" xml:space="preserve"> Xl ,xxx,   ,xxx,XX </tspan>
+        <tspan x="102" y="209" xml:space="preserve">( ' _,+o, | ,o+,"  )</tspan>
+        <tspan x="102" y="232" xml:space="preserve"> 4   "-^' X "^-'" 7 </tspan>
+        <tspan x="102" y="255" xml:space="preserve"> l,     ( ))     ,X </tspan>
+        <tspan x="102" y="278" xml:space="preserve"> :Xx,_ ,xXXXxx,_,XX </tspan>
+        <tspan x="102" y="301" xml:space="preserve">  4XXiX'-___-`XXXX' </tspan>
+        <tspan x="102" y="324" xml:space="preserve">   4XXi,_   _iXX7'  </tspan>
+        <tspan x="102" y="347" xml:space="preserve">    `4XXXXXXXXX^    </tspan>
+        <tspan x="102" y="370" xml:space="preserve">       ""^^^XX7     </tspan>
+    </text>
+    <rect id="Rectangle" fill="#FA2219" x="7" y="441" width="3" height="3"></rect>
+    <rect id="Rectangle-Copy-2" fill="#FA2219" x="10" y="438" width="3" height="3"></rect>
+    <rect id="Rectangle-Copy-3" fill="#FA2219" x="13" y="441" width="3" height="3"></rect>
+    <rect id="Rectangle-Copy-4" fill="#FA2219" x="16" y="438" width="3" height="3"></rect>
+    <rect id="Rectangle-Copy-5" fill="#FA2219" x="19" y="441" width="3" height="3"></rect>
+</svg>
