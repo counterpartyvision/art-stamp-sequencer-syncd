@@ -1,0 +1,20 @@
+window.id = parseInt(document.currentScript.getAttribute("id"));
+window.onload = () => {
+    appendCB = async () => {
+        let add = new Append();
+        try {
+            // q5.min.js.gz
+            await add.js(["A5297629053831280000"]);
+            await add.css(["A9071306030130623000"]);
+            await add.html(["A6995241237061746000"]);
+            await add.js(["A11967925320946629000"]);
+            // W.full.js
+            // await add.js(["A10207619717431880000"]);
+            setTimeout(setup, 500);
+        } catch (e) {
+            await add.error(e, e);
+        }
+    };
+    let s = document.createElement("script");
+    s.setAttribute("src", "/s/A6677669155563188000"), document.body.appendChild(s);
+};
