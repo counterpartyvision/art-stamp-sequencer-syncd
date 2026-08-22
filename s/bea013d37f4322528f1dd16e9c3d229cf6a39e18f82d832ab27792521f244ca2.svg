@@ -1,0 +1,3 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><style>@keyframes p{to{stroke-dashoffset:0}}</style><path d="M0 0h300v300H0z"/><text x="50%" y="50%" font-size="82" text-anchor="middle" dominant-baseline="middle" fill="none" stroke="#0f0" stroke-width="2.5" stroke-dasharray="450" stroke-dashoffset="450" letter-spacing=".1em" style="animation:p 8s infinite linear;font-family:monospace">{QFT}
+<animate attributeName="stroke" values="#0f0;#00bfff;#dc6e16;#ff0;#0f0" dur="8s" repeatCount="indefinite"/>
+</text></svg>
