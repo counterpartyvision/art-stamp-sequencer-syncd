@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      text-align: center;
+      overflow: hidden;
+    }
+    .image-container {
+      width: 400px;
+      height: 560px;
+      overflow: hidden;
+      display: inline-block;
+    }
+    svg {
+      margin: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="image-container">
+    <svg id="s" viewBox="0 0 400 560">
+      <image id="mainImage" href="https://ordinals.com/content/63b17c4de5f082f32acc785d6621852867ec995afe8b66d8973d1c4fbcf97cc7i0" width="400" height="560" onerror="useFallbackImage()"/>
+    </svg>
+  </div>
+  <script>
+    function useFallbackImage() {
+      let img = document.getElementById("mainImage");
+      img.setAttribute("href", "https://arweave.net/6xmMjtbBXBBNkY3o_1aCoFaWbeY1uLwjE8zFvDiHj1k/j1d507_image.gif");
+    }
+    function resize() {
+      let se = document.getElementById("s");
+      let container = document.querySelector(".image-container");
+      let min = Math.min(document.body.clientWidth, document.body.clientHeight);
+      let scale = min < 400 ? min / 400 : 1;
+      container.style.width = (400 * scale) + "px";
+      container.style.height = (560 * scale) + "px";
+      se.setAttribute("width", 400 * scale);
+      se.setAttribute("height", 560 * scale);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+  </script>
+</body>
+</html>
