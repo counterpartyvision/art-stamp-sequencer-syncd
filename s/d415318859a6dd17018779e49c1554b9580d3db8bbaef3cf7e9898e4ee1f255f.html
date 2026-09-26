@@ -1,0 +1,35 @@
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="trip" fx="10%" fy="10%" r="150%">
+      <stop offset="0%" style="stop-color:lime; stop-opacity:1" />
+      <stop offset="50%" style="stop-color:purple; stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:black; stop-opacity:0.9" />
+    </radialGradient>
+    <filter id="freakout">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="5" result="turb"/>
+      <feDisplacementMap in2="turb" in="SourceGraphic" scale="30" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#trip)" />
+  <g filter="url(#freakout)" transform="rotate(0 250 250)">
+    <animateTransform attributeName="transform" attributeType="XML" type="rotate"
+      from="0 250 250" to="360 250 250" dur="30s" repeatCount="indefinite"/>
+    <circle cx="250" cy="250" r="200" fill="none" stroke="white" stroke-width="3">
+      <animate attributeName="r" values="190;210;190" dur="8s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="250" cy="250" r="160" fill="none" stroke="cyan" stroke-width="2">
+      <animate attributeName="r" values="150;170;150" dur="6s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="250" cy="250" r="120" fill="none" stroke="magenta" stroke-width="2">
+      <animate attributeName="r" values="110;130;110" dur="5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="250" cy="250" r="80" fill="none" stroke="yellow" stroke-width="2">
+      <animate attributeName="r" values="70;90;70" dur="4s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="250" cy="250" r="40" fill="none" stroke="red" stroke-width="2">
+      <animate attributeName="r" values="30;50;30" dur="3s" repeatCount="indefinite" />
+    </circle>
+  </g>
+</svg>
