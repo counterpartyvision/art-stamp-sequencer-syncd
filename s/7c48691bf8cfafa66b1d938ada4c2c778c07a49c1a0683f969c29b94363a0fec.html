@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Overlay with GIF Background</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        .media-container {
+            width: 400px;
+            height: 560px;
+            overflow: hidden;
+            background-image: url('https://ordinals.com/content/dcb9555791284af3ad7af7ad5ad31af682a8e1328c179458b312b4d0841bf30bi0');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="media-container">
+        <video id="main-video" autoplay loop playsinline>
+            <source src="https://5ittgfwkea7ojb2lzrcsudn4k5m7lwibp2ekc5e5kf2ztg336feq.arweave.net/6iczFsogPuSHS8xFKg28V1n12QF-iKF0nVF1mZt78Uk/c27nue_video.mp4" type="video/mp4">
+        </video>
+    </div>
+    <script>
+        const video = document.getElementById('main-video');
+
+        // Attempt to play video with sound
+        video.play().catch(function(error) {
+            console.log('Video playback failed:', error);
+            // If playback fails (e.g., due to autoplay with sound restrictions), try playing muted
+            video.muted = true;
+            video.play().catch(function() {
+                // If muted playback also fails, hide video and show GIF background
+                console.log('Muted playback failed');
+                video.style.display = 'none';
+            });
+        });
+
+        // Handle video load failure
+        video.addEventListener('error', function() {
+            console.log('Video load failed');
+            video.style.display = 'none';
+        });
+
+        // Confirm video is loaded and playing
+        video.addEventListener('loadeddata', function() {
+            video.style.display = 'block';
+        });
+
+        // Check if video source is accessible
+        fetch(video.src, { method: 'HEAD' })
+            .then(response => {
+                if (!response.ok) {
+                    console.log('Video source inaccessible');
+                    video.style.display = 'none';
+                }
+            })
+            .catch(() => {
+                console.log('Video source fetch failed');
+                video.style.display = 'none';
+            });
+    </script>
+</body>
+</html>
